@@ -1,0 +1,38 @@
+{
+  "course": "Oracle APEX AI + Workflow Masterclass",
+  "deliveryMode": "specifications-only",
+  "apexVersion": "26.1.4",
+  "ordsMinimum": "26.1.1",
+  "databaseMinimum": "19c RU 19.18",
+  "workspace": "DEMO",
+  "parsingSchema": "DEMO",
+  "sqlclConnection": "demo",
+  "applications": [
+    {
+      "id": 100,
+      "name": "Employee Self Service",
+      "pageCount": 9
+    },
+    {
+      "id": 200,
+      "name": "HR Administration",
+      "pageCount": 12
+    }
+  ],
+  "counts": {
+    "episodes": 14,
+    "tables": 9,
+    "packages": 5,
+    "roles": 4,
+    "aiTools": 7
+  },
+  "workflow": {
+    "staticId": "LEAVE_APPROVAL",
+    "managerTaskStaticId": "LEAVE_MANAGER_APPROVAL",
+    "hrTaskStaticId": "LEAVE_HR_APPROVAL"
+  },
+  "agents": [
+    "EMPLOYEE_HR_AGENT",
+    "LEAVE_SUMMARY_AGENT"
+  ]
+}

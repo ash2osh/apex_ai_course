@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "applicationId": 100,
+  "applicationName": "Employee Self Service",
+  "navigationModel": "side",
+  "responsive": {"mobileFirst": true, "formColumns": 1, "reportsScrollHorizontally": true},
+  "accessibility": {"keyboardOperable": true, "visibleFocus": true, "labelsRequired": true, "statusUsesText": true, "minimumContrast": "WCAG-AA"},
+  "states": {
+    "empty": "Explain why no records exist and offer the relevant next action.",
+    "loading": "Use the standard APEX processing indicator and preserve the initiating label.",
+    "error": "Show actionable inline notifications without stack traces or sensitive identifiers.",
+    "success": "Confirm the completed operation and navigate to its resulting record when appropriate."
+  },
+  "security": {"identitySource": "APP_USER", "selfServicePredicates": "HR_USER_PKG.CURRENT_USER_ID", "directBalanceDmlAllowed": false},
+  "pages": [
+    {"id": 1, "title": "Dashboard", "primaryRegion": "Summary"},
+    {"id": 2, "title": "My Profile", "primaryRegion": "Profile"},
+    {"id": 3, "title": "My Leave Balances", "primaryRegion": "Balances"},
+    {"id": 4, "title": "Submit Leave Request", "primaryRegion": "Request Form"},
+    {"id": 5, "title": "My Leave Requests", "primaryRegion": "Requests"},
+    {"id": 6, "title": "Leave Request Details", "primaryRegion": "Request Details"},
+    {"id": 7, "title": "Workflow Timeline", "primaryRegion": "Timeline"},
+    {"id": 8, "title": "HR AI Assistant", "primaryRegion": "Assistant"},
+    {"id": 9, "title": "HR AI Agent", "primaryRegion": "Agent Chat"}
+  ]
+}

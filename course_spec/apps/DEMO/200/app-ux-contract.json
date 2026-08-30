@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "applicationId": 200,
+  "applicationName": "HR Administration",
+  "navigationModel": "side",
+  "responsive": {"mobileFirst": true, "formColumns": 1, "reportsScrollHorizontally": true},
+  "accessibility": {"keyboardOperable": true, "visibleFocus": true, "labelsRequired": true, "statusUsesText": true, "minimumContrast": "WCAG-AA"},
+  "states": {
+    "empty": "Name the missing administrative workload or data and provide a next step.",
+    "loading": "Use standard APEX processing feedback.",
+    "error": "Show a safe inline notification and retain entered values.",
+    "success": "Confirm the authorized change and refresh the affected report."
+  },
+  "authorization": {"managerPages": [1, 2, 3, 4], "adminPages": [1, 2, 3, 4, 5, 6, 7, 8, 9], "superAdminPages": [10, 11, 12]},
+  "pages": [
+    {"id": 1, "title": "Dashboard"}, {"id": 2, "title": "My Tasks"},
+    {"id": 3, "title": "Pending Leave Requests"}, {"id": 4, "title": "Leave Request Details"},
+    {"id": 5, "title": "Employees"}, {"id": 6, "title": "Employee Leave History"},
+    {"id": 7, "title": "Leave Types"}, {"id": 8, "title": "Leave Balances"},
+    {"id": 9, "title": "Workflow Monitor"}, {"id": 10, "title": "Users"},
+    {"id": 11, "title": "Roles"}, {"id": 12, "title": "System Settings"}
+  ]
+}
