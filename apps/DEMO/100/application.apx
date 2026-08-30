@@ -1,0 +1,55 @@
+app EMPLOYEE-SELF-SERVICE (
+    name: Employee Self Service
+    logo {
+        type: text
+        text: Employee Self Service
+    }
+    navigation {
+        homeUrl: {
+            page: 1
+        }
+        loginUrl: {
+            page: LOGIN
+        }
+    }
+    navigationMenu {
+        listTemplate: @/side-navigation-menu
+        templateOptions: [
+            #DEFAULT#
+            t-TreeNav--styleA
+            js-navCollapsed--hidden
+        ]
+        list: @navigation-menu
+    }
+    navigationBar {
+        list: @navigation-bar
+        listTemplate: @/navigation-bar
+        templateOptions: #DEFAULT#
+    }
+    userInterface {
+        currentTheme: @universal-theme
+        globalPage: 0
+        addBuiltWithApexToFooter: false
+    }
+    appFormatMasks {
+        date: DS
+        timestamp: DS
+        timestampTimeZone: DS
+    }
+    authentication {
+        scheme: @oracle-apex-accounts
+    }
+    sessionStateProtection {
+        checksumSalt: 1AD9B90EDC6DC7196162FF59862A29BE7DDB05E5F0C4830B93921AA516E76439
+    }
+    runtime {
+        allowFeedback: true
+    }
+
+    substitution APP_NAME (
+        value {
+            staticValue: Employee Self Service
+        }
+    )
+
+)

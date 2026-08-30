@@ -1,0 +1,55 @@
+app HR-ADMINISTRATION (
+    name: HR Administration
+    logo {
+        type: text
+        text: HR Administration
+    }
+    navigation {
+        homeUrl: {
+            page: 1
+        }
+        loginUrl: {
+            page: LOGIN
+        }
+    }
+    navigationMenu {
+        listTemplate: @/side-navigation-menu
+        templateOptions: [
+            #DEFAULT#
+            t-TreeNav--styleA
+            js-navCollapsed--hidden
+        ]
+        list: @navigation-menu
+    }
+    navigationBar {
+        list: @navigation-bar
+        listTemplate: @/navigation-bar
+        templateOptions: #DEFAULT#
+    }
+    userInterface {
+        currentTheme: @universal-theme
+        globalPage: 0
+        addBuiltWithApexToFooter: false
+    }
+    appFormatMasks {
+        date: DS
+        timestamp: DS
+        timestampTimeZone: DS
+    }
+    authentication {
+        scheme: @oracle-apex-accounts
+    }
+    sessionStateProtection {
+        checksumSalt: 0518ABF4217DE319B0EC1CF34BB09F2F3C92DA9E0FC3CE52D25ED1DDB8ABD20E
+    }
+    runtime {
+        allowFeedback: true
+    }
+
+    substitution APP_NAME (
+        value {
+            staticValue: HR Administration
+        }
+    )
+
+)

@@ -1,0 +1,115 @@
+name: Template checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: bash -n scripts/*.sh
+
+      - name: Run repository self-checks
+        run: bash scripts/test_template.sh
+
+      - name: Check Python syntax
+        run: python3 -c 'import ast, pathlib; [ast.parse(p.read_text(encoding="utf-8")) for p in [pathlib.Path("setup_graphify_apx.py"), *pathlib.Path("scripts").glob("*.py")]]'
+
+      - name: Check PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -Path scripts -Filter *.ps1 | ForEach-Object {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Host "::error file=$($_.FullName)::$($errors -join '; ')"
+            }
+          }
+          if ($failed) { exit 1 }
+
+      # Parsing cannot catch a method that only exists on newer .NET, so check
+      # the scripts against a real Windows PowerShell 5.1 compatibility profile.
+      - name: Check Windows PowerShell 5.1 compatibility
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -AllowClobber
+          $profileName = 'win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework'
+          $settings = @{
+            IncludeRules = @('PSUseCompatibleCommands', 'PSUseCompatibleTypes', 'PSUseCompatibleSyntax')
+            Rules = @{
+              PSUseCompatibleCommands = @{ Enable = $true; TargetProfiles = @($profileName) }
+              PSUseCompatibleTypes    = @{ Enable = $true; TargetProfiles = @($profileName) }
+              PSUseCompatibleSyntax   = @{ Enable = $true; TargetVersions = @('5.1', '7.0') }
+            }
+          }
+          $findings = @()
+          Get-ChildItem -Path scripts -Filter *.ps1 | ForEach-Object {
+            $findings += Invoke-ScriptAnalyzer -Path $_.FullName -Settings $settings
+          }
+          if ($findings.Count -gt 0) {
+            $findings | ForEach-Object { Write-Host "::error file=$($_.ScriptPath),line=$($_.Line)::$($_.Message)" }
+            exit 1
+          }
+          Write-Host "No Windows PowerShell 5.1 compatibility findings"
+
+      # ubuntu-latest ships pwsh, so run the native suite here as well as on
+      # Windows. It exercises load_env.ps1 and check_db_target.ps1, which the
+      # bash suite never touches.
+      - name: Run native PowerShell checks
+        shell: pwsh
+        run: ./scripts/test_template.ps1
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check Git Bash syntax
+        shell: bash
+        run: bash -n scripts/*.sh
+
+      - name: Run Git Bash repository self-checks
+        shell: bash
+        run: bash scripts/test_template.sh
+
+      - name: Check PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -Path scripts -Filter *.ps1 | ForEach-Object {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Host "::error file=$($_.FullName)::$($errors -join '; ')"
+            }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Run PowerShell 7 checks
+        shell: pwsh
+        run: ./scripts/test_template.ps1
+
+      - name: Run Windows PowerShell 5.1 checks
+        shell: powershell
+        run: ./scripts/test_template.ps1
+
+      - name: Check Python syntax
+        shell: powershell
+        run: python -c "import ast, pathlib; [ast.parse(p.read_text(encoding='utf-8')) for p in [pathlib.Path('setup_graphify_apx.py'), *pathlib.Path('scripts').glob('*.py')]]"
