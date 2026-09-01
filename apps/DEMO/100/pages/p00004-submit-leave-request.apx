@@ -1,0 +1,284 @@
+page 4 (
+    name: Submit Leave Request
+    alias: SUBMIT-LEAVE-REQUEST
+    title: Submit Leave Request
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Submit Leave Request
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region leave-request-form (
+        name: Leave Request Details
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P4_LEAVE_TYPE_CODE (
+        type: selectList
+        label {
+            label: Leave Type
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @leave-types
+            displayNullValue: true
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the type of leave you wish to request.
+        }
+    )
+
+    pageItem P4_START_DATE (
+        type: datePicker
+        label {
+            label: Start Date
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: YYYY-MM-DD
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the first date of your leave period.
+        }
+    )
+
+    pageItem P4_END_DATE (
+        type: datePicker
+        label {
+            label: End Date
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: YYYY-MM-DD
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the final date of your leave period.
+        }
+    )
+
+    pageItem P4_REASON (
+        type: textarea
+        label {
+            label: Reason / Comments
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        help {
+            helpText: Optional details or notes for your manager regarding this leave request.
+        }
+    )
+
+    pageItem P4_REQUEST_ID (
+        type: hidden
+        layout {
+            sequence: 50
+            region: @leave-request-form
+            slot: regionBody
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    pageItem P4_WORKFLOW_ID (
+        type: hidden
+        layout {
+            sequence: 60
+            region: @leave-request-form
+            slot: regionBody
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @leave-request-form
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 1
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button submit (
+        buttonName: SUBMIT
+        label: Submit Request
+        layout {
+            sequence: 20
+            region: @leave-request-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-paper-plane
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    process submit-leave-request (
+        name: Submit Leave Request
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                    l_request_id  number;
+                    l_workflow_id number;
+                    l_start_date  date;
+                    l_end_date    date;
+                begin
+                    begin
+                        l_start_date := to_date(:P4_START_DATE, 'YYYY-MM-DD');
+                    exception when others then
+                        l_start_date := to_date(:P4_START_DATE);
+                    end;
+                    begin
+                        l_end_date := to_date(:P4_END_DATE, 'YYYY-MM-DD');
+                    exception when others then
+                        l_end_date := to_date(:P4_END_DATE);
+                    end;
+
+                    hr_leave_pkg.create_request(
+                        p_username        => :APP_USER,
+                        p_leave_type_code => :P4_LEAVE_TYPE_CODE,
+                        p_start_date      => l_start_date,
+                        p_end_date        => l_end_date,
+                        p_reason          => :P4_REASON,
+                        p_request_id      => l_request_id
+                    );
+                    l_workflow_id := hr_workflow_pkg.start_leave_approval(
+                        p_request_id => l_request_id
+                    );
+                    :P4_REQUEST_ID := l_request_id;
+                    :P4_WORKFLOW_ID := l_workflow_id;
+                    commit;
+                    apex_application.g_print_success_message := 'Leave request #' || l_request_id || ' submitted successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Leave request submitted successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SUBMIT
+        }
+    )
+
+    branch redirect-to-details (
+        name: Go to Request Details
+        execution {
+            sequence: 10
+            point: afterProcessing
+        }
+        behavior {
+            type: pageOrUrl
+            target: {
+                page: 5
+            }
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SUBMIT
+        }
+    )
+
+)

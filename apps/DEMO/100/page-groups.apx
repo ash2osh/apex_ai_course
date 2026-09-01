@@ -1,3 +1,15 @@
 pageGroup administration (
     name: Administration
 )
+
+pageGroup ai-experiences (
+    name: AI Experiences
+)
+
+pageGroup leave-management (
+    name: Leave Management
+)
+
+pageGroup self-service (
+    name: Self Service
+)

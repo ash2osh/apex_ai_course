@@ -77,4 +77,135 @@ list navigation-menu (
         }
     )
 
+    entry my-profile (
+        label: My Profile
+        icon {
+            imageIconCssClasses: fa-user
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+
+    entry leave (
+        label: Leave
+        icon {
+            imageIconCssClasses: fa-calendar
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                type: url
+                url: #
+            }
+        }
+    )
+
+    entry my-leave-balances (
+        label: My Leave Balances
+        icon {
+            imageIconCssClasses: fa-calculator
+        }
+        layout {
+            sequence: 10
+            parentEntry: @leave
+        }
+        link {
+            target: {
+                page: 3
+            }
+        }
+    )
+
+    entry submit-leave-request (
+        label: Submit Leave Request
+        icon {
+            imageIconCssClasses: fa-calendar-plus-o
+        }
+        layout {
+            sequence: 20
+            parentEntry: @leave
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry my-leave-requests (
+        label: My Leave Requests
+        icon {
+            imageIconCssClasses: fa-calendar-check-o
+        }
+        layout {
+            sequence: 30
+            parentEntry: @leave
+        }
+        link {
+            target: {
+                page: 5
+            }
+        }
+    )
+
+    entry workflow-timeline (
+        label: Workflow Timeline
+        icon {
+            imageIconCssClasses: fa-clock-o
+        }
+        layout {
+            sequence: 40
+            parentEntry: @leave
+        }
+        link {
+            target: {
+                page: 7
+            }
+        }
+    )
+
+    entry hr-ai-assistant (
+        label: HR AI Assistant
+        icon {
+            imageIconCssClasses: fa-comments
+        }
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+        userDefinedAttributes {
+            1: AI Experience
+        }
+    )
+
+    entry hr-ai-agent (
+        label: HR AI Agent
+        icon {
+            imageIconCssClasses: fa-android
+        }
+        layout {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 9
+            }
+        }
+        userDefinedAttributes {
+            1: AI Experience
+        }
+    )
+
 )

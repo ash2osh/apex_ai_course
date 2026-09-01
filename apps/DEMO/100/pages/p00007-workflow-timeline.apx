@@ -1,0 +1,205 @@
+page 7 (
+    name: Workflow Timeline
+    alias: WORKFLOW-TIMELINE
+    title: Workflow Timeline
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Workflow Timeline
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region timeline-report (
+        name: Workflow Audit & Timeline History
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.event_id,
+                       e.request_id,
+                       t.leave_type_name,
+                       'Request #' || e.request_id || ' - ' || t.leave_type_name as request_title,
+                       e.event_type,
+                       e.from_status,
+                       e.to_status,
+                       e.actor_username,
+                       coalesce(e.comments, '-') as comments,
+                       e.event_timestamp
+                  from hr_leave_request_events e
+                  join hr_leave_requests r on r.request_id = e.request_id
+                  join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                 where r.user_id = hr_user_pkg.current_user_id
+                 order by e.event_timestamp desc
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column ACTOR_USERNAME (
+            type: plainText
+            heading {
+                heading: Actor
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column COMMENTS (
+            type: plainText
+            heading {
+                heading: Comments / Audit Details
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column EVENT_ID (
+            type: plainText
+            heading {
+                heading: Event ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column EVENT_TIMESTAMP (
+            type: plainText
+            heading {
+                heading: Event Timestamp
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column EVENT_TYPE (
+            type: plainText
+            heading {
+                heading: Event Type
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column FROM_STATUS (
+            type: plainText
+            heading {
+                heading: Previous Status
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column REQUEST_ID (
+            type: plainText
+            heading {
+                heading: Request ID
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column REQUEST_TITLE (
+            type: plainText
+            heading {
+                heading: Request Title
+            }
+            layout {
+                sequence: 25
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column TO_STATUS (
+            type: plainText
+            heading {
+                heading: New Status
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+)

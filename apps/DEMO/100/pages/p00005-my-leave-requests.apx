@@ -1,0 +1,199 @@
+page 5 (
+    name: My Leave Requests
+    alias: MY-LEAVE-REQUESTS
+    title: My Leave Requests
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: My Leave Requests
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region requests-report (
+        name: My Leave Requests
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select r.request_id,
+                       t.leave_type_name,
+                       r.start_date,
+                       r.end_date,
+                       r.requested_days,
+                       r.status,
+                       r.reason,
+                       r.created_at
+                  from hr_leave_requests r
+                  join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                 where r.user_id = hr_user_pkg.current_user_id
+                 order by r.created_at desc
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column CREATED_AT (
+            type: plainText
+            heading {
+                heading: Submitted At
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column END_DATE (
+            type: plainText
+            heading {
+                heading: End Date
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column REASON (
+            type: plainText
+            heading {
+                heading: Reason
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column REQUESTED_DAYS (
+            type: plainText
+            heading {
+                heading: Working Days
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column REQUEST_ID (
+            type: plainText
+            heading {
+                heading: Request ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column START_DATE (
+            type: plainText
+            heading {
+                heading: Start Date
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column STATUS (
+            type: plainText
+            heading {
+                heading: Status
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+    button new-request (
+        buttonName: NEW_REQUEST
+        label: Submit New Request
+        layout {
+            sequence: 10
+            region: @requests-report
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-plus
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 4
+            }
+        }
+    )
+
+)

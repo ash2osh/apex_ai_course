@@ -1,0 +1,407 @@
+page 6 (
+    name: Leave Request Details
+    alias: LEAVE-REQUEST-DETAILS
+    title: Leave Request Details
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Leave Request Details
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region request-overview (
+        name: Request Overview
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region request-timeline (
+        name: Request Event History
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            pageItemsToSubmit: P6_REQUEST_ID
+            sqlQuery:
+                ```sql
+                select e.event_id,
+                       e.event_type,
+                       e.from_status,
+                       e.to_status,
+                       e.actor_username,
+                       e.comments,
+                       e.event_timestamp
+                  from hr_leave_request_events e
+                 where e.request_id = to_number(:P6_REQUEST_ID)
+                 order by e.event_timestamp asc
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column ACTOR_USERNAME (
+            type: plainText
+            heading {
+                heading: Performed By
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column COMMENTS (
+            type: plainText
+            heading {
+                heading: Comments / Audit Details
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column EVENT_ID (
+            type: plainText
+            heading {
+                heading: Event ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column EVENT_TIMESTAMP (
+            type: plainText
+            heading {
+                heading: Timestamp
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column EVENT_TYPE (
+            type: plainText
+            heading {
+                heading: Action / Event
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column FROM_STATUS (
+            type: plainText
+            heading {
+                heading: Previous Status
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column TO_STATUS (
+            type: plainText
+            heading {
+                heading: New Status
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+    pageItem P6_REQUEST_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @request-overview
+            slot: regionBody
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    pageItem P6_REQ_DETAILS (
+        type: displayOnly
+        label {
+            label: Request Information
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P6_DATES_DISPLAY (
+        type: displayOnly
+        label {
+            label: Leave Period
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 30
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P6_REASON (
+        type: displayOnly
+        label {
+            label: Employee Reason
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 40
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P6_AI_SUMMARY (
+        type: displayOnly
+        label {
+            label: AI Decision Briefing
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 50
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P6_CANCEL_REASON (
+        type: selectList
+        label {
+            label: Cancellation Reason
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @cancellation-reasons
+            displayNullValue: true
+        }
+        help {
+            helpText: Select the reason for cancelling this leave request.
+        }
+    )
+
+    button back (
+        buttonName: BACK
+        label: Back to Requests
+        layout {
+            sequence: 10
+            region: @request-overview
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 5
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button cancel-request (
+        buttonName: CANCEL_REQUEST
+        label: Cancel This Request
+        layout {
+            sequence: 20
+            region: @request-overview
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-ban
+        }
+        behavior {
+            type: standard
+        }
+        security {
+            authorizationScheme: @can-cancel-request
+        }
+    )
+
+    process load-request-details (
+        name: Load Request Details
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    if :P6_REQUEST_ID is not null then
+                        for r in (
+                            select r.request_id,
+                                   t.leave_type_name,
+                                   r.start_date,
+                                   r.end_date,
+                                   r.requested_days,
+                                   r.status,
+                                   r.reason,
+                                   r.ai_summary
+                              from hr_leave_requests r
+                              join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                             where r.request_id = to_number(:P6_REQUEST_ID)
+                        ) loop
+                            :P6_REQ_DETAILS := 'Request #' || r.request_id || ' - ' || r.leave_type_name || ' [' || r.status || ']';
+                            :P6_DATES_DISPLAY := to_char(r.start_date, 'YYYY-MM-DD') || ' to ' || to_char(r.end_date, 'YYYY-MM-DD') || ' (' || r.requested_days || ' working days)';
+                            :P6_REASON := coalesce(r.reason, 'None specified');
+                            :P6_AI_SUMMARY := coalesce(r.ai_summary, 'Summary will be generated during automated workflow review.');
+                        end loop;
+                    end if;
+                end;
+                ```
+        }
+        execution {
+            sequence: 5
+            point: beforeHeader
+        }
+    )
+
+    process cancel-leave-request (
+        name: Cancel Leave Request
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_leave_pkg.cancel_request(
+                        p_request_id     => to_number(:P6_REQUEST_ID),
+                        p_actor_username => :APP_USER,
+                        p_reason         => :P6_CANCEL_REASON
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Leave request #' || :P6_REQUEST_ID || ' was cancelled successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Leave request was cancelled successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CANCEL_REQUEST
+        }
+        security {
+            authorizationScheme: @can-cancel-request
+        }
+    )
+
+)

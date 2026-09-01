@@ -1,0 +1,298 @@
+page 1 (
+    name: Dashboard
+    alias: DASHBOARD
+    title: Employee Self Service
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Dashboard
+        type: breadcrumb
+        layout {
+            sequence: 5
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region welcome-banner (
+        name: Employee Self Service
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+    region leave-balances (
+        name: My Leave Balances
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select b.balance_id,
+                       t.leave_type_code,
+                       t.leave_type_name,
+                       b.balance_year,
+                       b.entitlement_days,
+                       b.used_days,
+                       b.pending_days,
+                       (b.entitlement_days - b.used_days - b.pending_days) as available_days,
+                       'Available: ' || to_char(b.entitlement_days - b.used_days - b.pending_days) || ' days' as available_display,
+                       'Entitlement: ' || to_char(b.entitlement_days) || ' | Used: ' || to_char(b.used_days) || ' | Pending: ' || to_char(b.pending_days) as usage_display,
+                       case t.leave_type_code
+                         when 'ANNUAL' then 'fa-calendar'
+                         when 'SICK' then 'fa-heartbeat'
+                         when 'EMERGENCY' then 'fa-ambulance'
+                         else 'fa-clock-o'
+                       end as card_icon
+                  from hr_leave_balances b
+                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
+                 where b.user_id = hr_user_pkg.current_user_id
+                   and b.balance_year = extract(year from sysdate)
+                 order by t.display_order
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: BALANCE_ID
+        }
+        title {
+            column: LEAVE_TYPE_NAME
+        }
+        subtitle {
+            column: AVAILABLE_DISPLAY
+        }
+        body {
+            column: USAGE_DISPLAY
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+            iconCssClasses: fa-lg
+        }
+
+        action request-leave (
+            label: Request Leave
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectThisApp
+                target: {
+                    page: 4
+                }
+            }
+        )
+
+    )
+
+    region recent-requests (
+        name: Recent Leave Requests
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select r.request_id,
+                       t.leave_type_name,
+                       to_char(r.start_date, 'YYYY-MM-DD') || ' to ' || to_char(r.end_date, 'YYYY-MM-DD') as date_range,
+                       r.requested_days || ' working day(s)' as days_display,
+                       r.status as status_badge,
+                       r.created_at,
+                       'Request #' || r.request_id || ' - ' || t.leave_type_name as card_title,
+                       case r.status
+                         when 'APPROVED' then 'fa-check-circle'
+                         when 'REJECTED' then 'fa-times-circle'
+                         when 'CANCELLED' then 'fa-ban'
+                         when 'WORKFLOW_ERROR' then 'fa-exclamation-triangle'
+                         else 'fa-clock-o'
+                       end as status_icon
+                  from hr_leave_requests r
+                  join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                 where r.user_id = hr_user_pkg.current_user_id
+                 order by r.created_at desc
+                 fetch first 5 rows only
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+            startNewRow: false
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: REQUEST_ID
+        }
+        title {
+            column: CARD_TITLE
+        }
+        subtitle {
+            column: DATE_RANGE
+        }
+        body {
+            column: DAYS_DISPLAY
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: STATUS_ICON
+            iconCssClasses: fa-lg
+            badgeColumn: STATUS_BADGE
+        }
+
+        action view-details (
+            label: View Details
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectThisApp
+                target: {
+                    page: 6
+                }
+            }
+        )
+
+    )
+
+    region quick-actions (
+        name: Quick Actions
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    button submit-request (
+        buttonName: SUBMIT_REQUEST
+        label: Submit Leave Request
+        layout {
+            sequence: 10
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-calendar-plus-o
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    button view-all-requests (
+        buttonName: VIEW_ALL_REQUESTS
+        label: View All Requests
+        layout {
+            sequence: 20
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-list
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 5
+            }
+        }
+    )
+
+    button ask-ai-assistant (
+        buttonName: ASK_AI_ASSISTANT
+        label: Ask HR AI Assistant
+        layout {
+            sequence: 30
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-comments
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 8
+            }
+        }
+    )
+
+    button open-ai-agent (
+        buttonName: OPEN_AI_AGENT
+        label: Open HR AI Agent
+        layout {
+            sequence: 40
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-android
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 9
+            }
+        }
+    )
+
+)

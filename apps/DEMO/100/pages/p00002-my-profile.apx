@@ -1,0 +1,89 @@
+page 2 (
+    name: My Profile
+    alias: MY-PROFILE
+    title: My Profile
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: My Profile
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region profile-card (
+        name: Employee Profile
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select u.user_id,
+                       u.username,
+                       u.full_name,
+                       u.email,
+                       coalesce(d.department_name, 'Unassigned') as department_name,
+                       coalesce(m.full_name, 'None') as manager_name,
+                       case u.active_yn when 'Y' then 'Active' else 'Inactive' end as account_status,
+                       to_char(u.created_at, 'YYYY-MM-DD') as hire_date_display,
+                       'Username: ' || u.username || ' | Email: ' || u.email as contact_info,
+                       'Department: ' || coalesce(d.department_name, 'Unassigned') || ' | Manager: ' || coalesce(m.full_name, 'None') || ' | Status: ' || case u.active_yn when 'Y' then 'Active' else 'Inactive' end as job_info,
+                       'fa-user-circle' as profile_icon
+                  from hr_users u
+                  left join hr_departments d on d.department_id = u.department_id
+                  left join hr_users m on m.user_id = u.manager_id
+                 where u.user_id = hr_user_pkg.current_user_id
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: USER_ID
+        }
+        title {
+            column: FULL_NAME
+        }
+        subtitle {
+            column: CONTACT_INFO
+        }
+        body {
+            column: JOB_INFO
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: PROFILE_ICON
+            iconCssClasses: fa-lg
+            badgeColumn: ACCOUNT_STATUS
+        }
+    )
+
+)

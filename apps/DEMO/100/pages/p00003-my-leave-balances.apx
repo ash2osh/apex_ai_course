@@ -1,0 +1,248 @@
+page 3 (
+    name: My Leave Balances
+    alias: MY-LEAVE-BALANCES
+    title: My Leave Balances
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: My Leave Balances
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region leave-balance-cards (
+        name: Leave Balances for Current Year
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select b.balance_id,
+                       t.leave_type_code,
+                       t.leave_type_name,
+                       b.balance_year,
+                       b.entitlement_days,
+                       b.used_days,
+                       b.pending_days,
+                       b.available_days,
+                       'Available: ' || to_char(b.available_days) || ' days' as available_display,
+                       'Entitlement: ' || to_char(b.entitlement_days) || ' | Used: ' || to_char(b.used_days) || ' | Pending: ' || to_char(b.pending_days) as metrics_display,
+                       case t.leave_type_code
+                         when 'ANNUAL' then 'fa-calendar'
+                         when 'SICK' then 'fa-heartbeat'
+                         when 'EMERGENCY' then 'fa-ambulance'
+                         else 'fa-clock-o'
+                       end as card_icon
+                  from hr_leave_balances b
+                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
+                 where b.user_id = hr_user_pkg.current_user_id
+                   and b.balance_year = extract(year from sysdate)
+                 order by t.display_order
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: BALANCE_ID
+        }
+        title {
+            column: LEAVE_TYPE_NAME
+        }
+        subtitle {
+            column: AVAILABLE_DISPLAY
+        }
+        body {
+            column: METRICS_DISPLAY
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+            iconCssClasses: fa-lg
+        }
+
+        action request-this-leave (
+            label: Request Leave
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectThisApp
+                target: {
+                    page: 4
+                }
+            }
+        )
+
+    )
+
+    region balance-breakdown (
+        name: Balance Breakdown
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select t.leave_type_name,
+                       t.leave_type_code,
+                       b.balance_year,
+                       b.entitlement_days,
+                       b.used_days,
+                       b.pending_days,
+                       b.available_days,
+                       b.updated_at
+                  from hr_leave_balances b
+                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
+                 where b.user_id = hr_user_pkg.current_user_id
+                 order by b.balance_year desc, t.display_order
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column AVAILABLE_DAYS (
+            type: plainText
+            heading {
+                heading: Available Days
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column BALANCE_YEAR (
+            type: plainText
+            heading {
+                heading: Year
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column ENTITLEMENT_DAYS (
+            type: plainText
+            heading {
+                heading: Entitlement (Days)
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column LEAVE_TYPE_CODE (
+            type: plainText
+            heading {
+                heading: Type Code
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column PENDING_DAYS (
+            type: plainText
+            heading {
+                heading: Pending (Days)
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column UPDATED_AT (
+            type: plainText
+            heading {
+                heading: Last Updated
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column USED_DAYS (
+            type: plainText
+            heading {
+                heading: Used (Days)
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+    )
+
+)

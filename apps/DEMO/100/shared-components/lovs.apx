@@ -17,3 +17,105 @@ lov boolean (
     )
 
 )
+
+lov cancellation-reasons (
+    name: CANCELLATION_REASONS
+    source {
+        location: staticValues
+    }
+
+    entry schedule-conflict (
+        sequence: 10
+        display: Schedule Conflict
+        return: SCHEDULE_CONFLICT
+    )
+
+    entry plans-changed (
+        sequence: 20
+        display: Plans Changed
+        return: PLANS_CHANGED
+    )
+
+    entry personal-reasons (
+        sequence: 30
+        display: Personal Reasons
+        return: PERSONAL_REASONS
+    )
+
+    entry submitted-by-mistake (
+        sequence: 40
+        display: Submitted by Mistake
+        return: SUBMITTED_BY_MISTAKE
+    )
+
+    entry other (
+        sequence: 50
+        display: Other
+        return: OTHER
+    )
+
+)
+
+lov leave-types (
+    name: LEAVE_TYPES
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select leave_type_name as d,
+                   leave_type_code as r
+              from hr_leave_types
+             where active_yn = 'Y'
+             order by display_order
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
+lov request-statuses (
+    name: REQUEST_STATUSES
+    source {
+        location: staticValues
+    }
+
+    entry pending-manager-approval (
+        sequence: 10
+        display: Pending Manager Approval
+        return: PENDING_MANAGER_APPROVAL
+    )
+
+    entry pending-hr-approval (
+        sequence: 20
+        display: Pending HR Approval
+        return: PENDING_HR_APPROVAL
+    )
+
+    entry approved (
+        sequence: 30
+        display: Approved
+        return: APPROVED
+    )
+
+    entry rejected (
+        sequence: 40
+        display: Rejected
+        return: REJECTED
+    )
+
+    entry cancelled (
+        sequence: 50
+        display: Cancelled
+        return: CANCELLED
+    )
+
+    entry workflow-error (
+        sequence: 60
+        display: Workflow Error
+        return: WORKFLOW_ERROR
+    )
+
+)

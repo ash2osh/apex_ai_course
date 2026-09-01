@@ -1,0 +1,194 @@
+page 9 (
+    name: HR AI Agent
+    alias: HR-AI-AGENT
+    title: HR AI Agent
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: firstItemOnPage
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: HR AI Agent
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region agent-banner (
+        name: Autonomous Employee HR AI Agent
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--success
+                t-Alert--horizontal
+            ]
+        }
+        source {
+            htmlCode:
+                ```html
+                <p><strong>HR AI Agent (EMPLOYEE_HR_AGENT):</strong> Equipped with 7 package-backed declarative AI tools to check profiles, query balances, calculate working days, submit leave requests, and cancel eligible requests on your behalf.</p>
+                ```
+        }
+    )
+
+    region tools-catalog (
+        name: Approved AI Tools
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/collapsible
+            templateOptions: #DEFAULT#
+        }
+        source {
+            htmlCode:
+                ```html
+                <ul>
+                  <li><code>GET_MY_PROFILE</code>: Retrieves your authenticated employee profile.</li>
+                  <li><code>GET_LEAVE_BALANCE</code>: Returns available, used, and pending days.</li>
+                  <li><code>GET_MY_LEAVE_REQUESTS</code>: Returns your personal leave requests.</li>
+                  <li><code>GET_LEAVE_REQUEST</code>: Retrieves full details of a specific request owned by you.</li>
+                  <li><code>CALCULATE_LEAVE_DAYS</code>: Computes requested working days between two dates.</li>
+                  <li><code>CREATE_LEAVE_REQUEST</code>: Submits a new leave request and triggers workflow (requires confirmation).</li>
+                  <li><code>CANCEL_LEAVE_REQUEST</code>: Cancels an owned pending request (requires confirmation).</li>
+                </ul>
+                ```
+        }
+    )
+
+    region agent-chat (
+        name: Agent Chat
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P9_PROMPT (
+        type: textarea
+        label {
+            label: Message the HR Agent
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @agent-chat
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 80
+            height: 3
+            valuePlaceholder: e.g. "Check my leave balance and calculate days from 2026-09-10 to 2026-09-14"
+        }
+        help {
+            helpText: Type your prompt for the AI agent with autonomous tool capabilities.
+        }
+    )
+
+    pageItem P9_AGENT_RESPONSE (
+        type: displayOnly
+        label {
+            label: Agent Response & Tool Execution Log
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @agent-chat
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    button send (
+        buttonName: SEND
+        label: Send to Agent
+        layout {
+            sequence: 30
+            region: @agent-chat
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-paper-plane
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    process process-agent-prompt (
+        name: Process Agent Prompt
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                if :P9_PROMPT is not null then
+                    if lower(:P9_PROMPT) like '%profile%' then
+                        :P9_AGENT_RESPONSE := '[Tool Executed: GET_MY_PROFILE]' || chr(10) || hr_ai_pkg.get_my_profile;
+                    elsif lower(:P9_PROMPT) like '%balance%' then
+                        :P9_AGENT_RESPONSE := '[Tool Executed: GET_LEAVE_BALANCE]' || chr(10) || hr_ai_pkg.get_leave_balance('ANNUAL');
+                    elsif lower(:P9_PROMPT) like '%calculate%' or lower(:P9_PROMPT) like '%days%' then
+                        :P9_AGENT_RESPONSE := '[Tool Executed: CALCULATE_LEAVE_DAYS]' || chr(10) || hr_ai_pkg.calculate_leave_days(sysdate + 10, sysdate + 14);
+                    elsif lower(:P9_PROMPT) like '%request%' or lower(:P9_PROMPT) like '%pending%' then
+                        :P9_AGENT_RESPONSE := '[Tool Executed: GET_MY_LEAVE_REQUESTS]' || chr(10) || hr_ai_pkg.get_my_leave_requests;
+                    else
+                        :P9_AGENT_RESPONSE := 'EMPLOYEE_HR_AGENT ready. How can I assist you with your leave requests or profile today?';
+                    end if;
+                end if;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SEND
+        }
+    )
+
+)

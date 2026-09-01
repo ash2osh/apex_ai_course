@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "path": "~/.agents/skills"
+    },
+    {
+      "path": "~/.agents/skills/apex"
+    },
+    {
+      "path": ".agents/skills/superpowers"
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+page 8 (
+    name: HR AI Assistant
+    alias: HR-AI-ASSISTANT
+    title: HR AI Assistant
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: firstItemOnPage
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: HR AI Assistant
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region guidance-banner (
+        name: About HR Assistant
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--info
+                t-Alert--horizontal
+            ]
+        }
+        source {
+            htmlCode:
+                ```html
+                <p><strong>Conversational HR Assistant:</strong> Ask questions about company leave policy, approval processes, and your personal entitlements. This assistant is read-only and educational. For booking or cancelling leave directly via natural language, use the <strong>HR AI Agent</strong>.</p>
+                ```
+        }
+    )
+
+    region assistant-chat (
+        name: Ask HR Assistant
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P8_PROMPT (
+        type: textarea
+        label {
+            label: Your Question / Prompt
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @assistant-chat
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 80
+            height: 3
+            valuePlaceholder: Ask about leave policies, your balances, or approval steps...
+        }
+        help {
+            helpText: Type your HR or leave policy question here.
+        }
+    )
+
+    pageItem P8_RESPONSE (
+        type: displayOnly
+        label {
+            label: Assistant Response
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @assistant-chat
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    button ask (
+        buttonName: ASK
+        label: Ask Assistant
+        layout {
+            sequence: 30
+            region: @assistant-chat
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-paper-plane
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button quick-balance (
+        buttonName: QUICK_BALANCE
+        label: Check My Balance
+        layout {
+            sequence: 10
+            region: @assistant-chat
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-calculator
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button quick-pending (
+        buttonName: QUICK_PENDING
+        label: Show Pending Requests
+        layout {
+            sequence: 20
+            region: @assistant-chat
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-clock-o
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button quick-policy (
+        buttonName: QUICK_POLICY
+        label: Explain Leave Policy
+        layout {
+            sequence: 30
+            region: @assistant-chat
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-info-circle
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    process process-quick-action (
+        name: Process Quick Actions
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                if :REQUEST = 'QUICK_BALANCE' then
+                    :P8_PROMPT := 'How much leave balance do I have available?';
+                    :P8_RESPONSE := 'Based on your records, here is your balance:' || chr(10) || hr_ai_pkg.get_leave_balance('ANNUAL');
+                elsif :REQUEST = 'QUICK_PENDING' then
+                    :P8_PROMPT := 'What leave requests do I currently have pending?';
+                    :P8_RESPONSE := 'Here are your pending requests:' || chr(10) || hr_ai_pkg.get_my_leave_requests('PENDING_MANAGER_APPROVAL');
+                elsif :REQUEST = 'QUICK_POLICY' then
+                    :P8_PROMPT := 'Explain the company leave policy.';
+                    :P8_RESPONSE := 'Standard leave policy: Full-time employees receive 21 days of Annual Leave per year. Requests up to 5 working days require Direct Manager approval. Requests exceeding 5 working days automatically require additional HR Department review.';
+                elsif :P8_PROMPT is not null then
+                    if lower(:P8_PROMPT) like '%balance%' then
+                        :P8_RESPONSE := hr_ai_pkg.get_leave_balance('ANNUAL');
+                    elsif lower(:P8_PROMPT) like '%profile%' then
+                        :P8_RESPONSE := hr_ai_pkg.get_my_profile;
+                    elsif lower(:P8_PROMPT) like '%request%' or lower(:P8_PROMPT) like '%pending%' then
+                        :P8_RESPONSE := hr_ai_pkg.get_my_leave_requests;
+                    else
+                        :P8_RESPONSE := 'Thank you for asking. Standard annual leave entitlement is 21 days. All leave requests must be submitted in advance and approved by your manager.';
+                    end if;
+                end if;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+    )
+
+)
