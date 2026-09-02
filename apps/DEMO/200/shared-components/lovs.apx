@@ -165,3 +165,42 @@ lov roles (
         display: D
     }
 )
+
+lov yes-no (
+    name: YES_NO
+    source {
+        location: staticValues
+    }
+
+    entry yes (
+        sequence: 10
+        display: Yes
+        return: Y
+    )
+
+    entry no (
+        sequence: 20
+        display: No
+        return: N
+    )
+
+)
+
+lov all-users (
+    name: ALL_USERS
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select full_name || ' (' || username || ')' || case when active_yn = 'N' then ' [Inactive]' end as d,
+                   to_char(user_id) as r
+              from hr_users
+             order by full_name
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)

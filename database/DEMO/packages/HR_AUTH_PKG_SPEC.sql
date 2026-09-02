@@ -1,5 +1,9 @@
 
   CREATE OR REPLACE EDITIONABLE PACKAGE "DEMO"."HR_AUTH_PKG" AS
+    FUNCTION hash_password(p_username IN VARCHAR2, p_password IN VARCHAR2, p_salt IN VARCHAR2) RETURN VARCHAR2;
+    PROCEDURE set_password(p_username IN VARCHAR2, p_password IN VARCHAR2);
+    FUNCTION authenticate(p_username IN VARCHAR2, p_password IN VARCHAR2) RETURN BOOLEAN;
+
     FUNCTION has_role(p_username IN VARCHAR2, p_role_code IN VARCHAR2) RETURN BOOLEAN;
     FUNCTION is_employee(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;
     FUNCTION is_manager(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;

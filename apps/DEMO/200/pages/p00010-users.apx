@@ -46,8 +46,11 @@ page 10 (
                        u.username,
                        u.full_name,
                        u.email,
+                       u.department_id,
                        coalesce(d.department_name, 'Unassigned') as department_name,
+                       u.manager_id,
                        coalesce(m.full_name, 'None') as manager_name,
+                       u.active_yn,
                        case u.active_yn when 'Y' then 'Active' else 'Inactive' end as status,
                        u.created_at,
                        u.updated_at
@@ -171,6 +174,12 @@ page 10 (
             source {
                 dataType: STRING
             }
+            columnFormatting {
+                htmlExpression:
+                    ```html
+                    <a href="f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:10:P10_USER_ID,P10_USERNAME,P10_FULL_NAME,P10_EMAIL,P10_DEPARTMENT_ID,P10_MANAGER_ID,P10_ACTIVE_YN:#USER_ID#,#USERNAME#,#FULL_NAME#,#EMAIL#,#DEPARTMENT_ID#,#MANAGER_ID#,#ACTIVE_YN#">#USERNAME#</a>
+                    ```
+            }
         )
 
         column USER_ID (
@@ -186,6 +195,315 @@ page 10 (
             }
         )
 
+    )
+
+    region user-form (
+        name: Manage User Account
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    pageItem P10_USER_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @user-form
+            slot: regionBody
+        }
+    )
+
+    pageItem P10_USERNAME (
+        type: textField
+        label {
+            label: Username
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Unique system login username (e.g. EMP003, JSMITH).
+        }
+    )
+
+    pageItem P10_FULL_NAME (
+        type: textField
+        label {
+            label: Full Name
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P10_EMAIL (
+        type: textField
+        label {
+            label: Email Address
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P10_DEPARTMENT_ID (
+        type: selectList
+        label {
+            label: Department
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @departments
+            displayNullValue: true
+        }
+    )
+
+    pageItem P10_MANAGER_ID (
+        type: selectList
+        label {
+            label: Direct Manager
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @employees
+            displayNullValue: true
+        }
+    )
+
+    pageItem P10_ACTIVE_YN (
+        type: selectList
+        label {
+            label: Active Status
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
+        }
+        default {
+            type: static
+            staticValue: "Y"
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P10_PASSWORD (
+        type: password
+        label {
+            label: Password
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        help {
+            helpText: Set initial password for new users (defaults to 'oracle' if left blank) or new password when editing.
+        }
+    )
+
+    button save-user (
+        buttonName: SAVE_USER
+        label: Save User
+        layout {
+            sequence: 10
+            region: @user-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-save
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button reset-user (
+        buttonName: RESET_USER
+        label: Clear / New User
+        layout {
+            sequence: 20
+            region: @user-form
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-undo
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 10
+                clearCache: 10
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process save-user-process (
+        name: Save User Account
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                    l_user_id number := to_number(:P10_USER_ID);
+                    l_username varchar2(100) := upper(trim(:P10_USERNAME));
+                    l_raw_pass varchar2(100) := coalesce(:P10_PASSWORD, 'oracle');
+                    l_role_id number;
+                begin
+                    if l_user_id is null then
+                        insert into hr_users (
+                            username,
+                            full_name,
+                            email,
+                            department_id,
+                            manager_id,
+                            active_yn,
+                            created_by,
+                            created_at
+                        ) values (
+                            l_username,
+                            trim(:P10_FULL_NAME),
+                            lower(trim(:P10_EMAIL)),
+                            to_number(:P10_DEPARTMENT_ID),
+                            to_number(:P10_MANAGER_ID),
+                            nvl(:P10_ACTIVE_YN, 'Y'),
+                            coalesce(:APP_USER, user),
+                            systimestamp
+                        ) returning user_id into l_user_id;
+
+                        :P10_USER_ID := to_char(l_user_id);
+
+                        hr_auth_pkg.set_password(l_username, l_raw_pass);
+
+                        begin
+                            select role_id into l_role_id from hr_roles where role_code = 'EMPLOYEE';
+                            insert into hr_user_roles (user_id, role_id, created_by, created_at)
+                            values (l_user_id, l_role_id, coalesce(:APP_USER, user), systimestamp);
+                        exception
+                            when others then null;
+                        end;
+
+                        apex_application.g_print_success_message := 'Employee ' || l_username || ' created successfully with EMPLOYEE role.';
+                    else
+                        update hr_users
+                           set full_name     = trim(:P10_FULL_NAME),
+                               email         = lower(trim(:P10_EMAIL)),
+                               department_id = to_number(:P10_DEPARTMENT_ID),
+                               manager_id    = to_number(:P10_MANAGER_ID),
+                               active_yn     = nvl(:P10_ACTIVE_YN, 'Y'),
+                               updated_by    = coalesce(:APP_USER, user),
+                               updated_at    = systimestamp
+                         where user_id = l_user_id;
+
+                        if :P10_PASSWORD is not null and length(trim(:P10_PASSWORD)) > 0 then
+                            hr_auth_pkg.set_password(l_username, :P10_PASSWORD);
+                        end if;
+
+                        apex_application.g_print_success_message := 'User ' || l_username || ' updated successfully.';
+                    end if;
+                    commit;
+                exception
+                    when dup_val_on_index then
+                        apex_error.add_error (
+                            p_message          => 'A user with this username or email already exists.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: User saved successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SAVE_USER
+        }
     )
 
 )

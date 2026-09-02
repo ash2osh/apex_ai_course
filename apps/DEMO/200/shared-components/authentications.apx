@@ -1,3 +1,11 @@
+authentication hr-custom-auth (
+    name: HR_CUSTOM_AUTH
+    type: custom
+    settings {
+        authFunctionName: hr_auth_pkg.authenticate
+    }
+)
+
 authentication oracle-apex-accounts (
     name: Oracle APEX Accounts
     type: oracleApexAccounts

@@ -37,7 +37,7 @@ app HR-ADMINISTRATION (
         timestampTimeZone: DS
     }
     authentication {
-        scheme: @oracle-apex-accounts
+        scheme: @hr-custom-auth
     }
     sessionStateProtection {
         checksumSalt: 0518ABF4217DE319B0EC1CF34BB09F2F3C92DA9E0FC3CE52D25ED1DDB8ABD20E

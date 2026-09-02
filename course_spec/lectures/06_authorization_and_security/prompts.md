@@ -1,25 +1,31 @@
 # Episode 6: Coding Agent Prompts & Security Setup
 
-## 🤖 Coding Agent Prompts (APEX Authorization & Security Configuration)
+## 🤖 Coding Agent Prompts (Custom Authentication, App 200 CRUD & Security)
 
-### Prompt 1: Configure APEX Authorization Schemes in Shared Components
+### Prompt 1: Custom Authentication with Username/Password
 ```text
-Read ../../AUTHORIZATION_MODEL.md and ../../../apps/DEMO/100/shared-components/authorizations.apx.
+Read ../../DATABASE_MODEL.md and ../../../apps/DEMO/100/shared-components/authentications.apx.
 
-Configure the reusable APEX Authorization Schemes in Shared Components for both App 100 and App 200 leveraging the pre-created HR_AUTH_PKG functions:
-1. IS_EMPLOYEE: Calls hr_auth_pkg.is_employee(:APP_USER) (Evaluation Point: Once per session).
-2. IS_MANAGER: Calls hr_auth_pkg.is_manager(:APP_USER) (Evaluation Point: Once per session).
-3. IS_ADMIN: Calls hr_auth_pkg.is_admin(:APP_USER) (Evaluation Point: Once per session).
-4. IS_SUPER_ADMIN: Calls hr_auth_pkg.is_super_admin(:APP_USER) (Evaluation Point: Once per session).
-5. CAN_CANCEL_REQUEST: Calls hr_auth_pkg.can_cancel_request(:APP_USER, to_number(:P6_REQUEST_ID)) (Evaluation Point: Must Not Be Cached).
-6. CAN_APPROVE_REQUEST: Calls hr_auth_pkg.can_approve_request(:APP_USER, to_number(:P4_REQUEST_ID)) (Evaluation Point: Must Not Be Cached).
-
-Provide meaningful user-facing error messages for each authorization scheme.
+1. Implement the custom authentication function hr_auth_pkg.authenticate(p_username, p_password) returning BOOLEAN.
+   - Verify that the username exists in HR_USERS and active_yn = 'Y'.
+   - Validate non-empty password credentials.
+2. Configure a Custom Authentication Scheme in APEX Shared Components (HR_CUSTOM_AUTH) for both App 100 and App 200 pointing to hr_auth_pkg.authenticate.
+3. Ensure Login Page (Page 9999) processes the submission via APEX_AUTHENTICATION.LOGIN.
 ```
 
-### Prompt 2: Apply Multi-Tier Authorization across App 100 & App 200
+### Prompt 2: Configure Create & Edit (CRUD) Pages in App 200
 ```text
-Apply the authorization schemes across both applications:
+Enhance the following administration pages in Application 200 to enable Create and Edit functionality:
+1. Page 7 (Leave Types): Create & Edit leave type records in HR_LEAVE_TYPES (Code, Name, Default Entitlement, Requires Balance, Active, Display Order).
+2. Page 8 (Leave Balances): Create administrative balance adjustment process calling HR_LEAVE_PKG.ADJUST_BALANCE with user ID, leave type ID, year, days delta, and audit reason.
+3. Page 10 (Users): Create new employee record and edit existing user status (Department, Manager, Active Y/N).
+4. Page 11 (Roles): Assign and revoke user roles (EMPLOYEE, MANAGER, ADMIN, SUPER_ADMIN) in HR_USER_ROLES.
+5. Page 12 (System Settings): Edit configuration parameters.
+```
+
+### Prompt 3: Apply Multi-Tier Authorization across App 100 & App 200
+```text
+Apply the pre-implemented authorization schemes across both applications to secure all pages and actions:
 1. App 100 (Employee Self Service):
    - Application Level: Protect with IS_EMPLOYEE.
    - Component Level: Protect the "Cancel Request" button on Page 6 using CAN_CANCEL_REQUEST.
@@ -27,14 +33,19 @@ Apply the authorization schemes across both applications:
 2. App 200 (HR Administration):
    - Application Level: Protect with IS_ADMIN or IS_MANAGER.
    - Page Level: Protect Pages 10 (Users), 11 (Roles), and 12 (System Settings) with IS_SUPER_ADMIN.
+   - Page Level: Protect Pages 7 (Leave Types) and 8 (Balances) with IS_ADMIN.
    - Component Level: Protect Approve/Reject buttons on Page 4 using CAN_APPROVE_REQUEST.
 ```
 
-### Prompt 3: Security Validation & Test Script
+### Prompt 4: Security & Authentication Test Script
 ```text
-Generate a comprehensive PL/SQL test script to verify positive and negative authorization paths across all seed users:
-1. EMP001 (Ahmed Employee): Must have EMPLOYEE role; must NOT have MANAGER, ADMIN, or SUPER_ADMIN access; must be blocked from administrative operations.
-2. MGR001 (Mona Manager): Must have EMPLOYEE and MANAGER roles; can approve requests for direct reports in App 200.
-3. HR001 (Hala HR): Must have EMPLOYEE and ADMIN roles; can approve company-wide requests; must NOT have SUPER_ADMIN access to user/role management.
-4. ADMIN001 (Samira Super Admin): Must have SUPER_ADMIN access across all applications, roles, and settings.
+Generate a comprehensive PL/SQL test script to verify:
+1. Custom Authentication:
+   - Valid credentials for EMP001, MGR001, HR001, ADMIN001 return TRUE.
+   - Invalid password or non-existent username returns FALSE.
+2. Role Matrix:
+   - EMP001 has EMPLOYEE role; blocked from ADMIN and SUPER_ADMIN.
+   - MGR001 has EMPLOYEE and MANAGER roles; can approve direct reports in App 200.
+   - HR001 has EMPLOYEE and ADMIN roles; can edit Leave Types & Balances; blocked from Users/Roles.
+   - ADMIN001 has SUPER_ADMIN role; full access across all pages, roles, and settings.
 ```

@@ -37,7 +37,7 @@ app EMPLOYEE-SELF-SERVICE (
         timestampTimeZone: DS
     }
     authentication {
-        scheme: @oracle-apex-accounts
+        scheme: @hr-custom-auth
     }
     sessionStateProtection {
         checksumSalt: 1AD9B90EDC6DC7196162FF59862A29BE7DDB05E5F0C4830B93921AA516E76439

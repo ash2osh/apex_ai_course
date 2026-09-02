@@ -67,34 +67,23 @@ Build:
 - Leave balances
 - Leave types
 
-## Episode 6 — Authorization
-
+## Episode 6 — Custom Authentication, App 200 CRUD & Multi-Tier Security
 Build:
 
-- EMPLOYEE
-- MANAGER
-- ADMIN
-- SUPER_ADMIN
+- Custom Authentication Scheme (Username/Password via `HR_AUTH_PKG.AUTHENTICATE`)
+- App 200 CRUD Management Pages (Leave Types, Balance Adjustments, Users, Roles, Settings)
+- Multi-Tier Authorization Schemes (`EMPLOYEE`, `MANAGER`, `ADMIN`, `SUPER_ADMIN`)
 
 Demonstrate:
-
-- Application protection (App 100 & App 200)
-- Navigation protection
-- Page protection
-- Region & button protection
-- Process protection
-- Database package authorization
+- Page-level Super Admin lockdown (Pages 10, 11, 12)
+- Component, button, and process protection
+- Database package-level transactional assertions
 
 ## Episode 7 — APEX Workflow
 
 Build:
 
 - Leave approval workflow
-- Validation
-- Manager approval
-- Approval/rejection paths
-- Status updates
-
 ## Episode 8 — Human Tasks
 
 Build:

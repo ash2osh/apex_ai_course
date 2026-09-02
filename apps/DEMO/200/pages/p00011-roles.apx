@@ -49,7 +49,8 @@ page 11 (
                        r.role_id,
                        r.role_code,
                        r.role_name,
-                       ur.created_at
+                       ur.created_at,
+                       'Revoke' as revoke_action
                   from hr_user_roles ur
                   join hr_users u on u.user_id = ur.user_id
                   join hr_roles r on r.role_id = ur.role_id
@@ -91,6 +92,25 @@ page 11 (
             }
             source {
                 dataType: STRING
+            }
+        )
+
+        column REVOKE_ACTION (
+            type: plainText
+            heading {
+                heading: Action
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            columnFormatting {
+                htmlExpression:
+                    ```html
+                    <a class="t-Button t-Button--danger t-Button--simple t-Button--tiny" href="f?p=&APP_ID.:11:&APP_SESSION.:REVOKE_ROLE:&DEBUG.:11:P11_REVOKE_USER_ROLE_ID:#USER_ROLE_ID#">Revoke</a>
+                    ```
             }
         )
 
@@ -172,6 +192,219 @@ page 11 (
             }
         )
 
+    )
+
+    region assign-role-form (
+        name: Assign User Role
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    pageItem P11_REVOKE_USER_ROLE_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @assign-role-form
+            slot: regionBody
+        }
+    )
+
+    pageItem P11_USER_ID (
+        type: selectList
+        label {
+            label: Select User
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @assign-role-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @all-users
+            displayNullValue: true
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the user who will receive the role grant.
+        }
+    )
+
+    pageItem P11_ROLE_ID (
+        type: selectList
+        label {
+            label: Select Role
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @assign-role-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @roles
+            displayNullValue: true
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Role to assign: EMPLOYEE, MANAGER, ADMIN, or SUPER_ADMIN.
+        }
+    )
+
+    button grant-role (
+        buttonName: GRANT_ROLE
+        label: Assign Role
+        layout {
+            sequence: 10
+            region: @assign-role-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-plus-circle
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button reset-form (
+        buttonName: RESET_FORM
+        label: Clear Form
+        layout {
+            sequence: 20
+            region: @assign-role-form
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-undo
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 11
+                clearCache: 11
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process grant-role-process (
+        name: Grant Role to User
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    insert into hr_user_roles (
+                        user_id,
+                        role_id,
+                        created_by,
+                        created_at
+                    ) values (
+                        to_number(:P11_USER_ID),
+                        to_number(:P11_ROLE_ID),
+                        coalesce(:APP_USER, user),
+                        systimestamp
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Role assigned successfully.';
+                exception
+                    when dup_val_on_index then
+                        apex_error.add_error (
+                            p_message          => 'This user already possesses the selected role.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Role assigned successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: GRANT_ROLE
+        }
+    )
+
+    process revoke-role-process (
+        name: Revoke User Role
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                    l_count number;
+                begin
+                    if :P11_REVOKE_USER_ROLE_ID is not null then
+                        select count(*)
+                          into l_count
+                          from hr_user_roles ur
+                          join hr_roles r on r.role_id = ur.role_id
+                         where r.role_code = 'SUPER_ADMIN'
+                           and ur.user_role_id = to_number(:P11_REVOKE_USER_ROLE_ID);
+                        
+                        if l_count > 0 then
+                            select count(*)
+                              into l_count
+                              from hr_user_roles ur
+                              join hr_roles r on r.role_id = ur.role_id
+                             where r.role_code = 'SUPER_ADMIN';
+                            
+                            if l_count <= 1 then
+                                raise_application_error(-20020, 'Cannot revoke the last SUPER_ADMIN role assignment in the system.');
+                            end if;
+                        end if;
+
+                        delete from hr_user_roles where user_role_id = to_number(:P11_REVOKE_USER_ROLE_ID);
+                        commit;
+                        apex_application.g_print_success_message := 'Role assignment revoked successfully.';
+                    end if;
+                end;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: Role assignment revoked successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: REVOKE_ROLE
+        }
     )
 
 )

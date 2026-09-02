@@ -129,6 +129,12 @@ page 7 (
             source {
                 dataType: STRING
             }
+            columnFormatting {
+                htmlExpression:
+                    ```html
+                    <a href="f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:7:P7_LEAVE_TYPE_ID,P7_LEAVE_TYPE_CODE,P7_LEAVE_TYPE_NAME,P7_DEFAULT_ENTITLEMENT,P7_REQUIRES_BALANCE_YN,P7_ACTIVE_YN,P7_DISPLAY_ORDER:#LEAVE_TYPE_ID#,#LEAVE_TYPE_CODE#,#LEAVE_TYPE_NAME#,#DEFAULT_ENTITLEMENT#,#REQUIRES_BALANCE_YN#,#ACTIVE_YN#,#DISPLAY_ORDER#">#LEAVE_TYPE_CODE#</a>
+                    ```
+            }
         )
 
         column LEAVE_TYPE_ID (
@@ -170,6 +176,292 @@ page 7 (
             }
         )
 
+    )
+
+    region leave-type-form (
+        name: Manage Leave Type
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    pageItem P7_LEAVE_TYPE_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @leave-type-form
+            slot: regionBody
+        }
+    )
+
+    pageItem P7_LEAVE_TYPE_CODE (
+        type: textField
+        label {
+            label: Leave Type Code
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Unique uppercase identifier for the leave type (e.g. ANNUAL, SICK, UNPAID).
+        }
+    )
+
+    pageItem P7_LEAVE_TYPE_NAME (
+        type: textField
+        label {
+            label: Leave Type Name
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Descriptive name for the leave type.
+        }
+    )
+
+    pageItem P7_DEFAULT_ENTITLEMENT (
+        type: numberField
+        label {
+            label: Default Entitlement (Days)
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: static
+            staticValue: "0"
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Default annual entitlement in days for new employees.
+        }
+    )
+
+    pageItem P7_REQUIRES_BALANCE_YN (
+        type: selectList
+        label {
+            label: Requires Balance
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
+        }
+        default {
+            type: static
+            staticValue: "Y"
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P7_ACTIVE_YN (
+        type: selectList
+        label {
+            label: Active Status
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
+        }
+        default {
+            type: static
+            staticValue: "Y"
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P7_DISPLAY_ORDER (
+        type: numberField
+        label {
+            label: Display Order
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: static
+            staticValue: "10"
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    button save-leave-type (
+        buttonName: SAVE_LEAVE_TYPE
+        label: Save Leave Type
+        layout {
+            sequence: 10
+            region: @leave-type-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-save
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    button reset-form (
+        buttonName: RESET_FORM
+        label: Clear / New
+        layout {
+            sequence: 20
+            region: @leave-type-form
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-undo
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 7
+                clearCache: 7
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process save-leave-type-process (
+        name: Save Leave Type Record
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    if :P7_LEAVE_TYPE_ID is null then
+                        insert into hr_leave_types (
+                            leave_type_code,
+                            leave_type_name,
+                            default_entitlement,
+                            requires_balance_yn,
+                            active_yn,
+                            display_order,
+                            created_by,
+                            created_at
+                        ) values (
+                            upper(trim(:P7_LEAVE_TYPE_CODE)),
+                            trim(:P7_LEAVE_TYPE_NAME),
+                            nvl(to_number(:P7_DEFAULT_ENTITLEMENT), 0),
+                            nvl(:P7_REQUIRES_BALANCE_YN, 'Y'),
+                            nvl(:P7_ACTIVE_YN, 'Y'),
+                            nvl(to_number(:P7_DISPLAY_ORDER), 10),
+                            coalesce(:APP_USER, user),
+                            systimestamp
+                        ) returning leave_type_id into :P7_LEAVE_TYPE_ID;
+                        apex_application.g_print_success_message := 'Leave type created successfully.';
+                    else
+                        update hr_leave_types
+                           set leave_type_code     = upper(trim(:P7_LEAVE_TYPE_CODE)),
+                               leave_type_name     = trim(:P7_LEAVE_TYPE_NAME),
+                               default_entitlement = nvl(to_number(:P7_DEFAULT_ENTITLEMENT), 0),
+                               requires_balance_yn = nvl(:P7_REQUIRES_BALANCE_YN, 'Y'),
+                               active_yn           = nvl(:P7_ACTIVE_YN, 'Y'),
+                               display_order       = nvl(to_number(:P7_DISPLAY_ORDER), 10),
+                               updated_by          = coalesce(:APP_USER, user),
+                               updated_at          = systimestamp
+                         where leave_type_id = to_number(:P7_LEAVE_TYPE_ID);
+                        apex_application.g_print_success_message := 'Leave type updated successfully.';
+                    end if;
+                    commit;
+                exception
+                    when dup_val_on_index then
+                        apex_error.add_error (
+                            p_message          => 'A leave type with this code already exists.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Leave type saved successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SAVE_LEAVE_TYPE
+        }
     )
 
 )

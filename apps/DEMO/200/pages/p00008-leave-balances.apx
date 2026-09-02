@@ -43,8 +43,10 @@ page 8 (
             sqlQuery:
                 ```sql
                 select b.balance_id,
+                       u.user_id,
                        u.full_name as employee_name,
                        u.username,
+                       t.leave_type_code,
                        t.leave_type_name,
                        b.balance_year,
                        b.entitlement_days,
@@ -133,6 +135,12 @@ page 8 (
             }
             source {
                 dataType: STRING
+            }
+            columnFormatting {
+                htmlExpression:
+                    ```html
+                    <a href="f?p=&APP_ID.:8:&APP_SESSION.::&DEBUG.:8:P8_USER_ID,P8_LEAVE_TYPE_CODE,P8_YEAR:#USER_ID#,#LEAVE_TYPE_CODE#,#BALANCE_YEAR#">#EMPLOYEE_NAME#</a>
+                    ```
             }
         )
 
@@ -378,6 +386,30 @@ page 8 (
         }
         behavior {
             type: standard
+        }
+    )
+
+    button reset-adjustment (
+        buttonName: RESET_ADJUSTMENT
+        label: Clear Form
+        layout {
+            sequence: 20
+            region: @adjust-balance-form
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-undo
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 8
+                clearCache: 8
+            }
+            warnOnUnsavedChanges: doNotCheck
         }
     )
 
