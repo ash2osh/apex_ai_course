@@ -57,23 +57,7 @@ Build:
 - My requests
 - Request details
 
-## Episode 5 — Authorization
-
-Build:
-
-- EMPLOYEE
-- ADMIN
-- SUPER_ADMIN
-
-Demonstrate:
-
-- Navigation protection
-- Page protection
-- Region protection
-- Process protection
-- Database authorization
-
-## Episode 6 — HR Admin Application
+## Episode 5 — HR Admin Application
 
 Build:
 
@@ -82,6 +66,24 @@ Build:
 - Employees
 - Leave balances
 - Leave types
+
+## Episode 6 — Authorization
+
+Build:
+
+- EMPLOYEE
+- MANAGER
+- ADMIN
+- SUPER_ADMIN
+
+Demonstrate:
+
+- Application protection (App 100 & App 200)
+- Navigation protection
+- Page protection
+- Region & button protection
+- Process protection
+- Database package authorization
 
 ## Episode 7 — APEX Workflow
 

@@ -64,7 +64,7 @@ By the end of this lecture, viewers will understand:
 ### 5. Wrap-up (17:00 – 18:00)
 * **Talking Points**:
   * "We have our core employee self-service UI running."
-  * "In Episode 5, we will implement multi-tier authorization schemes to enforce rock-solid security."
+  * "In Episode 5, we will build the HR Administration Application (App 200)."
 
 ---
 
@@ -110,4 +110,4 @@ END;
 ---
 
 ## ⏭️ Next Episode
-* **[Lecture 05: Multi-Tier Authorization & Security Model](../05_authorization_and_security/lecture_notes.md)**
+* **[Lecture 05: HR Administration Application](../05_hr_admin_application/lecture_notes.md)**

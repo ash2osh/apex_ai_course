@@ -1,4 +1,4 @@
-# Episode 6: Coding Agent Prompts & Admin Queries
+# Episode 5: Coding Agent Prompts & Admin Queries
 
 ## 🤖 Coding Agent Prompts (App 200 Admin Features)
 
@@ -14,5 +14,5 @@ Write SQL queries for Page 1 (Dashboard) of App 200:
 ### Prompt 2: Balance Adjustment Process
 ```text
 Write the Page Processing PL/SQL block for Page 8 (Leave Balances) to record
-an administrative entitlement adjustment (+/- days) with audit logging.
+an administrative entitlement adjustment (+/- days) with audit logging via HR_LEAVE_PKG.ADJUST_BALANCE.
 ```

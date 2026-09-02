@@ -53,25 +53,25 @@ const episodes = [
     ],
   },
   {
-    dir: "05_authorization_and_security",
-    title: "Multi-Tier Authorization & Security Model",
-    subtitle: "Four roles and package-enforced business scope",
-    slides: [
-      ["The four-role hierarchy", [["Employee and manager", "EMPLOYEE owns self-service data\nMANAGER handles direct reports\nNeither receives broad administration"], ["Administration", "ADMIN handles company leave operations\nSUPER_ADMIN manages users, roles, settings"]]],
-      ["Defense in depth", [["APEX layer", "Authorized navigation\nProtected pages and regions\nAuthorized processes and buttons"], ["Database layer", "HR_AUTH_PKG repeats scope checks\nHR_LEAVE_PKG locks and validates\nURL tampering cannot widen access"]]],
-      ["Approval policy", [["Managers", "Must hold MANAGER role\nRequest employee must report directly\nUsername normalized to uppercase"], ["Administrators", "ADMIN and SUPER_ADMIN see company scope\nOnly SUPER_ADMIN changes security metadata"]]],
-      ["Enforced twice, bypassed never", [["Schemes", "IS_MANAGER • IS_ADMIN\nIS_SUPER_ADMIN\nCAN_APPROVE_REQUEST"], ["What comes next", "Build twelve App 200 pages\nUse package-owned adjustments\nExpose documented task views"]]],
-    ],
-  },
-  {
-    dir: "06_hr_admin_application",
+    dir: "05_hr_admin_application",
     title: "HR Administration Application",
     subtitle: "Twelve App 200 pages for approvals, reporting, and controlled maintenance",
     slides: [
       ["Operational page map", [["Approval work", "1 Dashboard • 2 My Tasks\n3 Pending Requests • 4 Details\n9 Workflow Monitor"], ["HR operations", "5 Employees • 6 History\n7 Leave Types • 8 Balances\n10 Users • 11 Roles • 12 Settings"]]],
       ["Authorization by page", [["Manager or Admin", "Dashboard and task inbox\nPending queue and request details\nDirect-report scope for managers"], ["Admin / Super Admin", "HR reports and balances: ADMIN\nUsers, roles, settings: SUPER_ADMIN\nNavigation is not the boundary"]]],
       ["Safe balance adjustment", [["Page input", "Employee • leave type • year\nSigned entitlement delta\nRequired audit reason"], ["Package call", "HR_LEAVE_PKG.ADJUST_BALANCE\nRechecks authorization and row state\nPage owns the commit"]]],
-      ["Twelve pages, four boundaries", [["Task reporting", "APEX_TASKS\nAPEX_TASK_PARTICIPANTS\nUPPER participant matching"], ["What comes next", "Model LEAVE_APPROVAL\nStart by static ID\nConnect Human Task definitions"]]],
+      ["Twelve pages, four boundaries", [["Task reporting", "APEX_TASKS\nAPEX_TASK_PARTICIPANTS\nUPPER participant matching"], ["What comes next", "Configure authorization schemes\nProtect dual applications\nVerify four seed roles"]]],
+    ],
+  },
+  {
+    dir: "06_authorization_and_security",
+    title: "Multi-Tier Authorization & Security Model",
+    subtitle: "Four roles and package-enforced business scope across App 100 & App 200",
+    slides: [
+      ["The four-role hierarchy", [["Employee and manager", "EMPLOYEE owns self-service data\nMANAGER handles direct reports\nNeither receives broad administration"], ["Administration", "ADMIN handles company leave operations\nSUPER_ADMIN manages users, roles, settings"]]],
+      ["Defense in depth", [["APEX layer", "Authorized navigation\nProtected pages and regions\nAuthorized processes and buttons"], ["Database layer", "HR_AUTH_PKG repeats scope checks\nHR_LEAVE_PKG locks and validates\nURL tampering cannot widen access"]]],
+      ["Approval policy", [["Managers", "Must hold MANAGER role\nRequest employee must report directly\nUsername normalized to uppercase"], ["Administrators", "ADMIN and SUPER_ADMIN see company scope\nOnly SUPER_ADMIN changes security metadata"]]],
+      ["Enforced twice, bypassed never", [["Schemes", "IS_MANAGER • IS_ADMIN\nIS_SUPER_ADMIN\nCAN_APPROVE_REQUEST"], ["What comes next", "Model LEAVE_APPROVAL\nStart by static ID\nConnect Human Task definitions"]]],
     ],
   },
   {
