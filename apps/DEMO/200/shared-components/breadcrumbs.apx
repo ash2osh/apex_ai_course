@@ -1,8 +1,8 @@
 breadcrumb breadcrumb (
     name: Breadcrumb
 
-    entry home (
-        name: Home
+    entry dashboard (
+        name: Dashboard
         pageNumber: 1
         execution {
             sequence: 10
@@ -10,6 +10,149 @@ breadcrumb breadcrumb (
         link {
             target: {
                 page: 1
+            }
+        }
+    )
+
+    entry my-tasks (
+        name: My Tasks
+        pageNumber: 2
+        execution {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+
+    entry pending-requests (
+        name: Pending Leave Requests
+        pageNumber: 3
+        execution {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 3
+            }
+        }
+    )
+
+    entry request-details (
+        name: Leave Request Details
+        pageNumber: 4
+        execution {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry employees (
+        name: Employees
+        pageNumber: 5
+        execution {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 5
+            }
+        }
+    )
+
+    entry leave-history (
+        name: Employee Leave History
+        pageNumber: 6
+        execution {
+            sequence: 60
+        }
+        link {
+            target: {
+                page: 6
+            }
+        }
+    )
+
+    entry leave-types (
+        name: Leave Types
+        pageNumber: 7
+        execution {
+            sequence: 70
+        }
+        link {
+            target: {
+                page: 7
+            }
+        }
+    )
+
+    entry leave-balances (
+        name: Leave Balances
+        pageNumber: 8
+        execution {
+            sequence: 80
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+    entry workflow-monitor (
+        name: Workflow Monitor
+        pageNumber: 9
+        execution {
+            sequence: 90
+        }
+        link {
+            target: {
+                page: 9
+            }
+        }
+    )
+
+    entry users (
+        name: Users
+        pageNumber: 10
+        execution {
+            sequence: 100
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+    entry roles (
+        name: Roles
+        pageNumber: 11
+        execution {
+            sequence: 110
+        }
+        link {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+    entry system-settings (
+        name: System Settings
+        pageNumber: 12
+        execution {
+            sequence: 120
+        }
+        link {
+            target: {
+                page: 12
             }
         }
     )

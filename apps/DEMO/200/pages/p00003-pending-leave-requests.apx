@@ -1,0 +1,212 @@
+page 3 (
+    name: Pending Leave Requests
+    alias: PENDING-LEAVE-REQUESTS
+    title: Pending Leave Requests
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @is-manager-or-admin
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Pending Leave Requests
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region pending-requests-report (
+        name: Pending Leave Requests
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select r.request_id,
+                       u.full_name as employee_name,
+                       u.username,
+                       coalesce(d.department_name, 'Engineering') as department_name,
+                       t.leave_type_name,
+                       r.start_date,
+                       r.end_date,
+                       r.requested_days,
+                       r.status,
+                       r.created_at as submitted_date
+                  from hr_leave_requests r
+                  join hr_users u on u.user_id = r.user_id
+                  join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                  left join hr_departments d on d.department_id = u.department_id
+                 where r.status in ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL', 'PENDING_HR_APPROVAL')
+                   and (
+                        (hr_auth_pkg.is_manager(:APP_USER) and u.manager_id = hr_user_pkg.current_user_id)
+                        or hr_auth_pkg.is_admin(:APP_USER)
+                       )
+                 order by r.created_at desc
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column DEPARTMENT_NAME (
+            type: plainText
+            heading {
+                heading: Department
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column EMPLOYEE_NAME (
+            type: plainText
+            heading {
+                heading: Employee
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column END_DATE (
+            type: plainText
+            heading {
+                heading: End Date
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column REQUESTED_DAYS (
+            type: plainText
+            heading {
+                heading: Requested Days
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column REQUEST_ID (
+            type: plainText
+            heading {
+                heading: Request ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column START_DATE (
+            type: plainText
+            heading {
+                heading: Start Date
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column STATUS (
+            type: plainText
+            heading {
+                heading: Status
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column SUBMITTED_DATE (
+            type: plainText
+            heading {
+                heading: Submitted
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column USERNAME (
+            type: plainText
+            heading {
+                heading: Username
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+)
+

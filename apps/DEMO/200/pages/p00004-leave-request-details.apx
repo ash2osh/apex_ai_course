@@ -1,0 +1,541 @@
+page 4 (
+    name: Leave Request Details
+    alias: LEAVE-REQUEST-DETAILS
+    title: Leave Request Decision & Details
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @is-manager-or-admin
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Leave Request Details
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region request-overview (
+        name: Request Information
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region decision-form (
+        name: Approver Decision
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    region request-timeline (
+        name: Request Audit & Event Timeline
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            pageItemsToSubmit: P4_REQUEST_ID
+            sqlQuery:
+                ```sql
+                select e.event_id,
+                       e.event_type,
+                       e.from_status,
+                       e.to_status,
+                       e.actor_username,
+                       coalesce(e.comments, '-') as comments,
+                       e.event_timestamp
+                  from hr_leave_request_events e
+                 where e.request_id = to_number(:P4_REQUEST_ID)
+                 order by e.event_timestamp asc
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column ACTOR_USERNAME (
+            type: plainText
+            heading {
+                heading: Performed By
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column COMMENTS (
+            type: plainText
+            heading {
+                heading: Notes / Comments
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column EVENT_ID (
+            type: plainText
+            heading {
+                heading: Event ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column EVENT_TIMESTAMP (
+            type: plainText
+            heading {
+                heading: Timestamp
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column EVENT_TYPE (
+            type: plainText
+            heading {
+                heading: Event Type
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column FROM_STATUS (
+            type: plainText
+            heading {
+                heading: From Status
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column TO_STATUS (
+            type: plainText
+            heading {
+                heading: To Status
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+    pageItem P4_REQUEST_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @request-overview
+            slot: regionBody
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    pageItem P4_EMPLOYEE_NAME (
+        type: displayOnly
+        label {
+            label: Employee
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_DEPARTMENT (
+        type: displayOnly
+        label {
+            label: Department
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 30
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_LEAVE_TYPE (
+        type: displayOnly
+        label {
+            label: Leave Category
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 40
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_DATES_DISPLAY (
+        type: displayOnly
+        label {
+            label: Leave Duration
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 50
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_STATUS (
+        type: displayOnly
+        label {
+            label: Current Status
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 60
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_REASON (
+        type: displayOnly
+        label {
+            label: Employee Justification
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 70
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_AI_SUMMARY (
+        type: displayOnly
+        label {
+            label: AI Decision Briefing
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 80
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_APPROVER_COMMENTS (
+        type: textarea
+        label {
+            label: Decision Comments / Notes
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @decision-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        help {
+            helpText: Provide comments, conditions, or reasons for this approval or rejection.
+        }
+    )
+
+    button back (
+        buttonName: BACK
+        label: Back to Requests
+        layout {
+            sequence: 10
+            region: @decision-form
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 3
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button approve (
+        buttonName: APPROVE
+        label: Approve Request
+        layout {
+            sequence: 20
+            region: @decision-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-check
+        }
+        behavior {
+            type: standard
+        }
+        security {
+            authorizationScheme: @can-approve-request
+        }
+    )
+
+    button reject (
+        buttonName: REJECT
+        label: Reject Request
+        layout {
+            sequence: 30
+            region: @decision-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-times
+        }
+        behavior {
+            type: standard
+        }
+        security {
+            authorizationScheme: @can-approve-request
+        }
+    )
+
+    process load-request-details (
+        name: Load Request Details
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    if :P4_REQUEST_ID is not null then
+                        for r in (
+                            select r.request_id,
+                                   u.full_name as employee_name,
+                                   coalesce(d.department_name, 'Engineering') as department_name,
+                                   t.leave_type_name,
+                                   to_char(r.start_date, 'YYYY-MM-DD') || ' to ' || to_char(r.end_date, 'YYYY-MM-DD') || ' (' || r.requested_days || ' working days)' as dates_display,
+                                   r.status,
+                                   coalesce(r.reason, 'None specified') as reason,
+                                   coalesce(r.ai_summary, 'Summary generated during workflow review.') as ai_summary
+                              from hr_leave_requests r
+                              join hr_users u on u.user_id = r.user_id
+                              join hr_leave_types t on t.leave_type_id = r.leave_type_id
+                              left join hr_departments d on d.department_id = u.department_id
+                             where r.request_id = to_number(:P4_REQUEST_ID)
+                        ) loop
+                            :P4_EMPLOYEE_NAME := r.employee_name;
+                            :P4_DEPARTMENT := r.department_name;
+                            :P4_LEAVE_TYPE := r.leave_type_name;
+                            :P4_DATES_DISPLAY := r.dates_display;
+                            :P4_STATUS := r.status;
+                            :P4_REASON := r.reason;
+                            :P4_AI_SUMMARY := r.ai_summary;
+                        end loop;
+                    end if;
+                end;
+                ```
+        }
+        execution {
+            sequence: 5
+            point: beforeHeader
+        }
+    )
+
+    process approve-request (
+        name: Approve Leave Request
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => to_number(:P4_REQUEST_ID),
+                        p_actor_username => :APP_USER,
+                        p_outcome        => 'APPROVED',
+                        p_comments       => :P4_APPROVER_COMMENTS
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was approved successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Leave request approved successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: APPROVE
+        }
+        security {
+            authorizationScheme: @can-approve-request
+        }
+    )
+
+    process reject-request (
+        name: Reject Leave Request
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => to_number(:P4_REQUEST_ID),
+                        p_actor_username => :APP_USER,
+                        p_outcome        => 'REJECTED',
+                        p_comments       => :P4_APPROVER_COMMENTS
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was rejected.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: Leave request was rejected.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: REJECT
+        }
+        security {
+            authorizationScheme: @can-approve-request
+        }
+    )
+
+)
+

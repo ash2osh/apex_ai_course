@@ -1,3 +1,11 @@
-pageGroup administration (
-    name: Administration
+pageGroup approvals-tasks (
+    name: Approvals & Tasks
+)
+
+pageGroup hr-management (
+    name: HR Management
+)
+
+pageGroup system-governance (
+    name: System & Governance
 )

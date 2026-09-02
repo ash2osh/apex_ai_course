@@ -1,0 +1,417 @@
+page 8 (
+    name: Leave Balances
+    alias: LEAVE-BALANCES
+    title: Leave Balances & Adjustments
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @is-admin
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Leave Balances
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region balances-overview (
+        name: Employee Leave Balances
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select b.balance_id,
+                       u.full_name as employee_name,
+                       u.username,
+                       t.leave_type_name,
+                       b.balance_year,
+                       b.entitlement_days,
+                       b.used_days,
+                       b.pending_days,
+                       b.adjustment_days,
+                       b.available_days,
+                       b.updated_at
+                  from hr_leave_balances b
+                  join hr_users u on u.user_id = b.user_id
+                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
+                 order by b.balance_year desc, u.full_name, t.display_order
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column ADJUSTMENT_DAYS (
+            type: plainText
+            heading {
+                heading: Adjustment
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column AVAILABLE_DAYS (
+            type: plainText
+            heading {
+                heading: Available Days
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column BALANCE_ID (
+            type: plainText
+            heading {
+                heading: Balance ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column BALANCE_YEAR (
+            type: plainText
+            heading {
+                heading: Year
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column EMPLOYEE_NAME (
+            type: plainText
+            heading {
+                heading: Employee
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column ENTITLEMENT_DAYS (
+            type: plainText
+            heading {
+                heading: Entitlement
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column PENDING_DAYS (
+            type: plainText
+            heading {
+                heading: Pending
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column UPDATED_AT (
+            type: plainText
+            heading {
+                heading: Last Updated
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column USED_DAYS (
+            type: plainText
+            heading {
+                heading: Used
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column USERNAME (
+            type: plainText
+            heading {
+                heading: Username
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+    region adjust-balance-form (
+        name: Administrative Balance Adjustment
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    pageItem P8_USER_ID (
+        type: selectList
+        label {
+            label: Employee
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @employees
+            displayNullValue: true
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the employee whose leave balance will be adjusted.
+        }
+    )
+
+    pageItem P8_LEAVE_TYPE_CODE (
+        type: selectList
+        label {
+            label: Leave Type
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        lov {
+            type: sharedComponent
+            lov: @leave-types
+            displayNullValue: true
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the category of leave to adjust.
+        }
+    )
+
+    pageItem P8_YEAR (
+        type: numberField
+        label {
+            label: Calendar Year
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: expression
+            language: plsql
+            plsqlExpression: extract(year from sysdate)
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Enter the calendar year for which this adjustment applies.
+        }
+    )
+
+    pageItem P8_DELTA (
+        type: numberField
+        label {
+            label: Adjustment Delta (Days)
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Enter positive days to increase balance or negative days to reduce balance (e.g. 2.0 or -1.5).
+        }
+    )
+
+    pageItem P8_REASON (
+        type: textarea
+        label {
+            label: Adjustment Reason
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Document the business justification or policy reason for this administrative adjustment.
+        }
+    )
+
+    button apply-adjustment (
+        buttonName: APPLY_ADJUSTMENT
+        label: Apply Balance Adjustment
+        layout {
+            sequence: 10
+            region: @adjust-balance-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-check-circle
+        }
+        behavior {
+            type: standard
+        }
+    )
+
+    process adjust-balance (
+        name: Apply Administrative Adjustment
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_leave_pkg.adjust_balance(
+                        p_user_id          => to_number(:P8_USER_ID),
+                        p_leave_type_code  => :P8_LEAVE_TYPE_CODE,
+                        p_year             => to_number(:P8_YEAR),
+                        p_adjustment_delta => to_number(:P8_DELTA),
+                        p_actor_username   => :APP_USER,
+                        p_reason           => :P8_REASON
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Administrative balance adjustment was applied successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Balance adjustment applied successfully.
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: APPLY_ADJUSTMENT
+        }
+    )
+
+)
+

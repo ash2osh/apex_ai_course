@@ -1,10 +1,86 @@
-authorization administration-rights (
-    name: Administration Rights
+authorization can-approve-request (
+    name: CAN_APPROVE_REQUEST
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody: return true;
+        plsqlFunctionBody:
+            ```plsql
+            return hr_auth_pkg.can_approve_request(
+                p_actor_username => :APP_USER,
+                p_request_id     => to_number(:P4_REQUEST_ID)
+            );
+            ```
     }
     error {
-        errorMessage: Insufficient privileges, user is not an Administrator
+        errorMessage: You do not have permission to decide or approve this leave request.
+    }
+)
+
+authorization is-admin (
+    name: IS_ADMIN
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            return hr_auth_pkg.is_admin(:APP_USER);
+            ```
+    }
+    error {
+        errorMessage: Insufficient privileges. Administrator access required.
+    }
+)
+
+authorization is-authenticated (
+    name: IS_AUTHENTICATED
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            return :APP_USER is not null and :APP_USER != 'nobody';
+            ```
+    }
+    error {
+        errorMessage: Please sign in to access this application.
+    }
+)
+
+authorization is-manager (
+    name: IS_MANAGER
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            return hr_auth_pkg.is_manager(:APP_USER);
+            ```
+    }
+    error {
+        errorMessage: Insufficient privileges. Manager access required.
+    }
+)
+
+authorization is-manager-or-admin (
+    name: IS_MANAGER_OR_ADMIN
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            return hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER);
+            ```
+    }
+    error {
+        errorMessage: Insufficient privileges. Manager or Administrator access required.
+    }
+)
+
+authorization is-super-admin (
+    name: IS_SUPER_ADMIN
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            return hr_auth_pkg.is_super_admin(:APP_USER);
+            ```
+    }
+    error {
+        errorMessage: Insufficient privileges. Super Administrator access required.
     }
 )

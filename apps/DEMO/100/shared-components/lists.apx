@@ -75,6 +75,11 @@ list navigation-menu (
                 page: 1
             }
         }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
+        }
     )
 
     entry my-profile (
@@ -89,6 +94,11 @@ list navigation-menu (
             target: {
                 page: 2
             }
+        }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
         }
     )
 
@@ -106,6 +116,11 @@ list navigation-menu (
                 url: #
             }
         }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
+        }
     )
 
     entry my-leave-balances (
@@ -121,6 +136,11 @@ list navigation-menu (
             target: {
                 page: 3
             }
+        }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
         }
     )
 
@@ -138,6 +158,11 @@ list navigation-menu (
                 page: 4
             }
         }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
+        }
     )
 
     entry my-leave-requests (
@@ -154,6 +179,11 @@ list navigation-menu (
                 page: 5
             }
         }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
+        }
     )
 
     entry workflow-timeline (
@@ -169,6 +199,11 @@ list navigation-menu (
             target: {
                 page: 7
             }
+        }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
         }
     )
 
@@ -188,6 +223,11 @@ list navigation-menu (
         userDefinedAttributes {
             1: AI Experience
         }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
+        }
     )
 
     entry hr-ai-agent (
@@ -205,6 +245,11 @@ list navigation-menu (
         }
         userDefinedAttributes {
             1: AI Experience
+        }
+        serverSideCondition {
+            type: expression
+            language: plsql
+            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
         }
     )
 

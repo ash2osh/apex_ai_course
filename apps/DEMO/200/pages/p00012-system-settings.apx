@@ -1,0 +1,134 @@
+page 12 (
+    name: System Settings
+    alias: SYSTEM-SETTINGS
+    title: System Configuration Parameters
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @is-super-admin
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: System Settings
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region settings-report (
+        name: System Settings
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select setting_code,
+                       setting_value,
+                       coalesce(description, '-') as description,
+                       created_at,
+                       updated_at
+                  from hr_system_settings
+                 order by setting_code
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column CREATED_AT (
+            type: plainText
+            heading {
+                heading: Configured Date
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column DESCRIPTION (
+            type: plainText
+            heading {
+                heading: Purpose / Description
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column SETTING_CODE (
+            type: plainText
+            heading {
+                heading: Setting Key
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column SETTING_VALUE (
+            type: plainText
+            heading {
+                heading: Value
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column UPDATED_AT (
+            type: plainText
+            heading {
+                heading: Last Updated
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+    )
+
+)
+

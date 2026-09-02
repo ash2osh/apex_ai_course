@@ -1,0 +1,250 @@
+page 1 (
+    name: Dashboard
+    alias: DASHBOARD
+    title: HR Administration Dashboard
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Dashboard
+        type: breadcrumb
+        layout {
+            sequence: 5
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region welcome-banner (
+        name: HR Administration
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+    region kpi-cards (
+        name: Administrative Overview
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select 'PENDING' as card_key,
+                       'Pending Approvals' as card_title,
+                       to_char(count(*)) as metric_value,
+                       'Requests awaiting manager or HR review' as subtitle_text,
+                       'fa-clock-o' as card_icon,
+                       'u-color-1' as card_color
+                  from hr_leave_requests
+                 where status in ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL', 'PENDING_HR_APPROVAL')
+                union all
+                select 'APPROVED_MONTH' as card_key,
+                       'Approved This Month' as card_title,
+                       to_char(count(*)) as metric_value,
+                       'Total approved in current calendar month' as subtitle_text,
+                       'fa-check-circle' as card_icon,
+                       'u-color-4' as card_color
+                  from hr_leave_requests
+                 where status = 'APPROVED'
+                   and created_at >= trunc(sysdate, 'MM')
+                union all
+                select 'REJECTED_MONTH' as card_key,
+                       'Rejected This Month' as card_title,
+                       to_char(count(*)) as metric_value,
+                       'Total rejected in current calendar month' as subtitle_text,
+                       'fa-times-circle' as card_icon,
+                       'u-color-7' as card_color
+                  from hr_leave_requests
+                 where status = 'REJECTED'
+                   and created_at >= trunc(sysdate, 'MM')
+                union all
+                select 'CURRENT_LEAVE' as card_key,
+                       'Currently on Leave' as card_title,
+                       to_char(count(distinct user_id)) as metric_value,
+                       'Employees with active leave today' as subtitle_text,
+                       'fa-users' as card_icon,
+                       'u-color-9' as card_color
+                  from hr_leave_requests
+                 where status = 'APPROVED'
+                   and trunc(sysdate) between start_date and end_date
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: CARD_KEY
+        }
+        title {
+            column: CARD_TITLE
+        }
+        subtitle {
+            column: METRIC_VALUE
+        }
+        body {
+            column: SUBTITLE_TEXT
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+            iconCssClasses: fa-lg
+        }
+
+        action view-pending (
+            label: View Requests
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectThisApp
+                target: {
+                    page: 3
+                }
+            }
+        )
+
+    )
+
+    region quick-actions (
+        name: Management Actions
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    button open-my-tasks (
+        buttonName: OPEN_MY_TASKS
+        label: My Tasks
+        layout {
+            sequence: 10
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-tasks
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 2
+            }
+        }
+    )
+
+    button open-pending-requests (
+        buttonName: OPEN_PENDING_REQUESTS
+        label: Pending Requests
+        layout {
+            sequence: 20
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-clock-o
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 3
+            }
+        }
+    )
+
+    button open-employees (
+        buttonName: OPEN_EMPLOYEES
+        label: Employees Directory
+        layout {
+            sequence: 30
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-users
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 5
+            }
+        }
+        security {
+            authorizationScheme: @is-admin
+        }
+    )
+
+    button open-balances (
+        buttonName: OPEN_BALANCES
+        label: Leave Balances & Adjustments
+        layout {
+            sequence: 40
+            region: @quick-actions
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-balance-scale
+        }
+        behavior {
+            type: standard
+            action: redirectThisApp
+            target: {
+                page: 8
+            }
+        }
+        security {
+            authorizationScheme: @is-admin
+        }
+    )
+
+)
+

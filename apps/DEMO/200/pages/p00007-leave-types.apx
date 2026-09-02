@@ -1,0 +1,176 @@
+page 7 (
+    name: Leave Types
+    alias: LEAVE-TYPES
+    title: Leave Types Policy Catalog
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @is-admin
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Leave Types
+        type: breadcrumb
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+        source {
+            breadcrumb: @breadcrumb
+        }
+    )
+
+    region leave-types-report (
+        name: Configured Leave Types
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select leave_type_id,
+                       leave_type_code,
+                       leave_type_name,
+                       default_entitlement,
+                       requires_balance_yn,
+                       active_yn,
+                       display_order,
+                       created_at
+                  from hr_leave_types
+                 order by display_order
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+
+        column ACTIVE_YN (
+            type: plainText
+            heading {
+                heading: Active
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column CREATED_AT (
+            type: plainText
+            heading {
+                heading: Created Date
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: DATE
+            }
+        )
+
+        column DEFAULT_ENTITLEMENT (
+            type: plainText
+            heading {
+                heading: Default Entitlement (Days)
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column DISPLAY_ORDER (
+            type: plainText
+            heading {
+                heading: Sort Order
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column LEAVE_TYPE_CODE (
+            type: plainText
+            heading {
+                heading: Code
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column LEAVE_TYPE_ID (
+            type: plainText
+            heading {
+                heading: Type ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type Name
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+        column REQUIRES_BALANCE_YN (
+            type: plainText
+            heading {
+                heading: Requires Balance
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+        )
+
+    )
+
+)
+

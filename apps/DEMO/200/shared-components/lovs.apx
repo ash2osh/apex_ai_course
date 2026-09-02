@@ -1,3 +1,22 @@
+lov balance-years (
+    name: BALANCE_YEARS
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select distinct to_char(balance_year) as d,
+                   to_char(balance_year) as r
+              from hr_leave_balances
+             order by 1 desc
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
 lov boolean (
     name: BOOLEAN
     source {
@@ -16,4 +35,133 @@ lov boolean (
         return: TRUE
     )
 
+)
+
+lov departments (
+    name: DEPARTMENTS
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select department_name as d,
+                   to_char(department_id) as r
+              from hr_departments
+             where active_yn = 'Y'
+             order by department_name
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
+lov employees (
+    name: EMPLOYEES
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select full_name || ' (' || username || ')' as d,
+                   to_char(user_id) as r
+              from hr_users
+             where active_yn = 'Y'
+             order by full_name
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
+lov leave-types (
+    name: LEAVE_TYPES
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select leave_type_name as d,
+                   leave_type_code as r
+              from hr_leave_types
+             where active_yn = 'Y'
+             order by display_order
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
+lov request-statuses (
+    name: REQUEST_STATUSES
+    source {
+        location: staticValues
+    }
+
+    entry submitted (
+        sequence: 5
+        display: Submitted
+        return: SUBMITTED
+    )
+
+    entry pending-manager-approval (
+        sequence: 10
+        display: Pending Manager Approval
+        return: PENDING_MANAGER_APPROVAL
+    )
+
+    entry pending-hr-approval (
+        sequence: 20
+        display: Pending HR Approval
+        return: PENDING_HR_APPROVAL
+    )
+
+    entry approved (
+        sequence: 30
+        display: Approved
+        return: APPROVED
+    )
+
+    entry rejected (
+        sequence: 40
+        display: Rejected
+        return: REJECTED
+    )
+
+    entry cancelled (
+        sequence: 50
+        display: Cancelled
+        return: CANCELLED
+    )
+
+    entry workflow-error (
+        sequence: 60
+        display: Workflow Error
+        return: WORKFLOW_ERROR
+    )
+
+)
+
+lov roles (
+    name: ROLES
+    source {
+        location: localDatabase
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select role_name as d,
+                   to_char(role_id) as r
+              from hr_roles
+             order by role_id
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
 )
