@@ -1,5 +1,11 @@
+-- =============================================================================
+-- Script: 01_update_hr_workflow_pkg.sql
+-- Purpose: Update HR_WORKFLOW_PKG to start native APEX Workflow (leave-approval)
+--          and synchronize the resulting workflow_id in HR_LEAVE_REQUESTS.
+-- Date: 2026-09-05
+-- =============================================================================
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_WORKFLOW_PKG" AS
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_WORKFLOW_PKG" AS
 
     FUNCTION get_system_setting(
         p_setting_code   IN VARCHAR2,

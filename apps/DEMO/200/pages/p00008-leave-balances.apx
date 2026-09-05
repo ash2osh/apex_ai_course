@@ -15,22 +15,19 @@ page 8 (
         formAutoComplete: false
     }
 
-    region breadcrumb (
-        name: Leave Balances
-        type: breadcrumb
+    region adjust-balance-form (
+        name: Administrative Balance Adjustment
+        type: staticContent
         layout {
-            sequence: 10
-            slot: breadcrumbBar
+            sequence: 30
+            slot: body
         }
         appearance {
-            template: @/title-bar
-            templateOptions: #DEFAULT#
-        }
-        componentAppearance {
-            breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
         }
     )
 
@@ -72,6 +69,9 @@ page 8 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8638088500069177
+        }
 
         column ADJUSTMENT_DAYS (
             type: plainText
@@ -83,6 +83,9 @@ page 8 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -97,6 +100,9 @@ page 8 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column BALANCE_ID (
@@ -109,6 +115,9 @@ page 8 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -123,6 +132,9 @@ page 8 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column EMPLOYEE_NAME (
@@ -133,14 +145,14 @@ page 8 (
             layout {
                 sequence: 20
             }
+            columnFormatting {
+                htmlExpression: <a href="f?p=&APP_ID.:8:&APP_SESSION.::&DEBUG.:8:P8_USER_ID,P8_LEAVE_TYPE_CODE,P8_YEAR:#USER_ID#,#LEAVE_TYPE_CODE#,#BALANCE_YEAR#">#EMPLOYEE_NAME#</a>
+            }
             source {
                 dataType: STRING
             }
-            columnFormatting {
-                htmlExpression:
-                    ```html
-                    <a href="f?p=&APP_ID.:8:&APP_SESSION.::&DEBUG.:8:P8_USER_ID,P8_LEAVE_TYPE_CODE,P8_YEAR:#USER_ID#,#LEAVE_TYPE_CODE#,#BALANCE_YEAR#">#EMPLOYEE_NAME#</a>
-                    ```
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -155,6 +167,9 @@ page 8 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column LEAVE_TYPE_NAME (
@@ -167,6 +182,9 @@ page 8 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -181,6 +199,9 @@ page 8 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
         column UPDATED_AT (
@@ -193,6 +214,9 @@ page 8 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: I
             }
         )
 
@@ -207,6 +231,9 @@ page 8 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: J
+            }
         )
 
         column USERNAME (
@@ -220,107 +247,86 @@ page 8 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ADJUSTMENT_DAYS (
+                sequence: 9
+            )
+
+            displayColumn AVAILABLE_DAYS (
+                sequence: 10
+            )
+
+            displayColumn BALANCE_ID (
+                sequence: 1
+            )
+
+            displayColumn BALANCE_YEAR (
+                sequence: 5
+            )
+
+            displayColumn EMPLOYEE_NAME (
+                sequence: 2
+            )
+
+            displayColumn ENTITLEMENT_DAYS (
+                sequence: 6
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 4
+            )
+
+            displayColumn PENDING_DAYS (
+                sequence: 8
+            )
+
+            displayColumn UPDATED_AT (
+                sequence: 11
+            )
+
+            displayColumn USED_DAYS (
+                sequence: 7
+            )
+
+            displayColumn USERNAME (
+                sequence: 3
+            )
+
         )
 
     )
 
-    region adjust-balance-form (
-        name: Administrative Balance Adjustment
-        type: staticContent
-        layout {
-            sequence: 30
-            slot: body
-        }
-        appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--accent1
-            ]
-        }
-    )
-
-    pageItem P8_USER_ID (
-        type: selectList
-        label {
-            label: Employee
-            alignment: left
+    region breadcrumb (
+        name: Leave Balances
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
         }
         layout {
             sequence: 10
-            region: @adjust-balance-form
-            slot: regionBody
+            slot: breadcrumbBar
         }
         appearance {
-            template: @/optional-floating
+            template: @/title-bar
             templateOptions: #DEFAULT#
         }
-        lov {
-            type: sharedComponent
-            lov: @employees
-            displayNullValue: true
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Select the employee whose leave balance will be adjusted.
-        }
-    )
-
-    pageItem P8_LEAVE_TYPE_CODE (
-        type: selectList
-        label {
-            label: Leave Type
-            alignment: left
-        }
-        layout {
-            sequence: 20
-            region: @adjust-balance-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @leave-types
-            displayNullValue: true
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Select the category of leave to adjust.
-        }
-    )
-
-    pageItem P8_YEAR (
-        type: numberField
-        label {
-            label: Calendar Year
-            alignment: left
-        }
-        layout {
-            sequence: 30
-            region: @adjust-balance-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        default {
-            type: expression
-            language: plsql
-            plsqlExpression: extract(year from sysdate)
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Enter the calendar year for which this adjustment applies.
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
         }
     )
 
@@ -347,6 +353,33 @@ page 8 (
         }
     )
 
+    pageItem P8_LEAVE_TYPE_CODE (
+        type: selectList
+        label {
+            label: Leave Type
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @leave-types
+        }
+        layout {
+            sequence: 20
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the category of leave to adjust.
+        }
+    )
+
     pageItem P8_REASON (
         type: textarea
         label {
@@ -370,6 +403,60 @@ page 8 (
         }
     )
 
+    pageItem P8_USER_ID (
+        type: selectList
+        label {
+            label: Employee
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @employees
+        }
+        layout {
+            sequence: 10
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the employee whose leave balance will be adjusted.
+        }
+    )
+
+    pageItem P8_YEAR (
+        type: numberField
+        label {
+            label: Calendar Year
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @adjust-balance-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        default {
+            type: expression
+            plsqlExpression: extract(year from sysdate)
+        }
+        help {
+            helpText: Enter the calendar year for which this adjustment applies.
+        }
+    )
+
     button apply-adjustment (
         buttonName: APPLY_ADJUSTMENT
         label: Apply Balance Adjustment
@@ -383,9 +470,6 @@ page 8 (
             hot: true
             templateOptions: #DEFAULT#
             icon: fa-check-circle
-        }
-        behavior {
-            type: standard
         }
     )
 
@@ -403,7 +487,6 @@ page 8 (
             icon: fa-undo
         }
         behavior {
-            type: standard
             action: redirectThisApp
             target: {
                 page: 8
@@ -439,6 +522,9 @@ page 8 (
         successMessage {
             successMessage: Balance adjustment applied successfully.
         }
+        advanced {
+            executionMappingIdentifier: 8640519491069178
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: APPLY_ADJUSTMENT
@@ -446,4 +532,3 @@ page 8 (
     )
 
 )
-

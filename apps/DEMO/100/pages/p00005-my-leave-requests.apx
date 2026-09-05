@@ -17,6 +17,9 @@ page 5 (
     region breadcrumb (
         name: My Leave Requests
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -27,9 +30,6 @@ page 5 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -66,6 +66,9 @@ page 5 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8612102284068563
+        }
 
         column CREATED_AT (
             type: plainText
@@ -77,6 +80,9 @@ page 5 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -91,6 +97,9 @@ page 5 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column LEAVE_TYPE_NAME (
@@ -103,6 +112,9 @@ page 5 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -117,6 +129,9 @@ page 5 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column REQUESTED_DAYS (
@@ -129,6 +144,9 @@ page 5 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -143,6 +161,9 @@ page 5 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column START_DATE (
@@ -155,6 +176,9 @@ page 5 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -169,6 +193,54 @@ page 5 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_AT (
+                sequence: 8
+            )
+
+            displayColumn END_DATE (
+                sequence: 4
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 2
+            )
+
+            displayColumn REASON (
+                sequence: 7
+            )
+
+            displayColumn REQUESTED_DAYS (
+                sequence: 5
+            )
+
+            displayColumn REQUEST_ID (
+                sequence: 1
+            )
+
+            displayColumn START_DATE (
+                sequence: 3
+            )
+
+            displayColumn STATUS (
+                sequence: 6
+            )
+
         )
 
     )
@@ -188,7 +260,6 @@ page 5 (
             icon: fa-plus
         }
         behavior {
-            type: standard
             action: redirectThisApp
             target: {
                 page: 4

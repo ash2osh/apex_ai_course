@@ -19,10 +19,7 @@ authorization is-admin (
     name: IS_ADMIN
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody:
-            ```plsql
-            return hr_auth_pkg.is_admin(:APP_USER);
-            ```
+        plsqlFunctionBody: return hr_auth_pkg.is_admin(:APP_USER);
     }
     error {
         errorMessage: Insufficient privileges. Administrator access required.
@@ -33,10 +30,7 @@ authorization is-authenticated (
     name: IS_AUTHENTICATED
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody:
-            ```plsql
-            return :APP_USER is not null and :APP_USER != 'nobody';
-            ```
+        plsqlFunctionBody: return :APP_USER is not null and :APP_USER != 'nobody';
     }
     error {
         errorMessage: Please sign in to access this application.
@@ -47,10 +41,7 @@ authorization is-employee (
     name: IS_EMPLOYEE
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody:
-            ```plsql
-            return hr_auth_pkg.is_employee(:APP_USER);
-            ```
+        plsqlFunctionBody: return hr_auth_pkg.is_employee(:APP_USER);
     }
     error {
         errorMessage: Insufficient privileges. Employee access required.
@@ -61,10 +52,7 @@ authorization is-manager (
     name: IS_MANAGER
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody:
-            ```plsql
-            return hr_auth_pkg.is_manager(:APP_USER);
-            ```
+        plsqlFunctionBody: return hr_auth_pkg.is_manager(:APP_USER);
     }
     error {
         errorMessage: Insufficient privileges. Manager access required.
@@ -75,10 +63,7 @@ authorization is-super-admin (
     name: IS_SUPER_ADMIN
     type: plSqlFunctionBody
     settings {
-        plsqlFunctionBody:
-            ```plsql
-            return hr_auth_pkg.is_super_admin(:APP_USER);
-            ```
+        plsqlFunctionBody: return hr_auth_pkg.is_super_admin(:APP_USER);
     }
     error {
         errorMessage: Insufficient privileges. Super Administrator access required.

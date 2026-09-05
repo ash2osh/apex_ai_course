@@ -14,9 +14,183 @@ page 3 (
         formAutoComplete: false
     }
 
+    region balance-breakdown (
+        name: Balance Breakdown
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select t.leave_type_name,
+                       t.leave_type_code,
+                       b.balance_year,
+                       b.entitlement_days,
+                       b.used_days,
+                       b.pending_days,
+                       b.available_days,
+                       b.updated_at
+                  from hr_leave_balances b
+                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
+                 where b.user_id = hr_user_pkg.current_user_id
+                 order by b.balance_year desc, t.display_order
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+        }
+        advanced {
+            savedReportMappingIdentifier: 8609243624068554
+        }
+
+        column AVAILABLE_DAYS (
+            type: plainText
+            heading {
+                heading: Available Days
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column BALANCE_YEAR (
+            type: plainText
+            heading {
+                heading: Year
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column ENTITLEMENT_DAYS (
+            type: plainText
+            heading {
+                heading: Entitlement (Days)
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column LEAVE_TYPE_CODE (
+            type: plainText
+            heading {
+                heading: Type Code
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column LEAVE_TYPE_NAME (
+            type: plainText
+            heading {
+                heading: Leave Type
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column PENDING_DAYS (
+            type: plainText
+            heading {
+                heading: Pending (Days)
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column UPDATED_AT (
+            type: plainText
+            heading {
+                heading: Last Updated
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column USED_DAYS (
+            type: plainText
+            heading {
+                heading: Used (Days)
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+    )
+
     region breadcrumb (
         name: My Leave Balances
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -27,9 +201,6 @@ page 3 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -96,150 +267,9 @@ page 3 (
                 sequence: 10
             }
             behavior {
-                type: redirectThisApp
                 target: {
                     page: 4
                 }
-            }
-        )
-
-    )
-
-    region balance-breakdown (
-        name: Balance Breakdown
-        type: interactiveReport
-        source {
-            location: localDatabase
-            type: sqlQuery
-            sqlQuery:
-                ```sql
-                select t.leave_type_name,
-                       t.leave_type_code,
-                       b.balance_year,
-                       b.entitlement_days,
-                       b.used_days,
-                       b.pending_days,
-                       b.available_days,
-                       b.updated_at
-                  from hr_leave_balances b
-                  join hr_leave_types t on t.leave_type_id = b.leave_type_id
-                 where b.user_id = hr_user_pkg.current_user_id
-                 order by b.balance_year desc, t.display_order
-                ```
-        }
-        layout {
-            sequence: 30
-            slot: body
-        }
-        appearance {
-            template: @/standard
-            templateOptions: #DEFAULT#
-        }
-        pagination {
-            type: rowRangesXToYOfZ
-        }
-
-        column AVAILABLE_DAYS (
-            type: plainText
-            heading {
-                heading: Available Days
-            }
-            layout {
-                sequence: 70
-            }
-            source {
-                dataType: NUMBER
-            }
-        )
-
-        column BALANCE_YEAR (
-            type: plainText
-            heading {
-                heading: Year
-            }
-            layout {
-                sequence: 30
-            }
-            source {
-                dataType: NUMBER
-            }
-        )
-
-        column ENTITLEMENT_DAYS (
-            type: plainText
-            heading {
-                heading: Entitlement (Days)
-            }
-            layout {
-                sequence: 40
-            }
-            source {
-                dataType: NUMBER
-            }
-        )
-
-        column LEAVE_TYPE_CODE (
-            type: plainText
-            heading {
-                heading: Type Code
-            }
-            layout {
-                sequence: 20
-            }
-            source {
-                dataType: STRING
-            }
-        )
-
-        column LEAVE_TYPE_NAME (
-            type: plainText
-            heading {
-                heading: Leave Type
-            }
-            layout {
-                sequence: 10
-            }
-            source {
-                dataType: STRING
-            }
-        )
-
-        column PENDING_DAYS (
-            type: plainText
-            heading {
-                heading: Pending (Days)
-            }
-            layout {
-                sequence: 60
-            }
-            source {
-                dataType: NUMBER
-            }
-        )
-
-        column UPDATED_AT (
-            type: plainText
-            heading {
-                heading: Last Updated
-            }
-            layout {
-                sequence: 80
-            }
-            source {
-                dataType: DATE
-            }
-        )
-
-        column USED_DAYS (
-            type: plainText
-            heading {
-                heading: Used (Days)
-            }
-            layout {
-                sequence: 50
-            }
-            source {
-                dataType: NUMBER
             }
         )
 

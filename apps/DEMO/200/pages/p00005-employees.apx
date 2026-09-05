@@ -18,6 +18,9 @@ page 5 (
     region breadcrumb (
         name: Employees
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -28,9 +31,6 @@ page 5 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -67,6 +67,9 @@ page 5 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8632626476069156
+        }
 
         column CREATED_AT (
             type: plainText
@@ -78,6 +81,9 @@ page 5 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -92,6 +98,9 @@ page 5 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column EMAIL (
@@ -104,6 +113,9 @@ page 5 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -118,6 +130,9 @@ page 5 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column MANAGER_NAME (
@@ -130,6 +145,9 @@ page 5 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -144,6 +162,9 @@ page 5 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column USERNAME (
@@ -156,6 +177,9 @@ page 5 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -170,9 +194,15 @@ page 5 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
     )
 
 )
-

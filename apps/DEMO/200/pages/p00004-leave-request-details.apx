@@ -18,6 +18,9 @@ page 4 (
     region breadcrumb (
         name: Leave Request Details
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -28,25 +31,6 @@ page 4 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
-        }
-    )
-
-    region request-overview (
-        name: Request Information
-        type: staticContent
-        layout {
-            sequence: 20
-            slot: body
-        }
-        appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--scrollBody
-            ]
         }
     )
 
@@ -66,13 +50,28 @@ page 4 (
         }
     )
 
+    region request-overview (
+        name: Request Information
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
     region request-timeline (
         name: Request Audit & Event Timeline
         type: interactiveReport
         source {
             location: localDatabase
             type: sqlQuery
-            pageItemsToSubmit: P4_REQUEST_ID
             sqlQuery:
                 ```sql
                 select e.event_id,
@@ -86,6 +85,7 @@ page 4 (
                  where e.request_id = to_number(:P4_REQUEST_ID)
                  order by e.event_timestamp asc
                 ```
+            pageItemsToSubmit: P4_REQUEST_ID
         }
         layout {
             sequence: 40
@@ -98,6 +98,9 @@ page 4 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8629907420069155
+        }
 
         column ACTOR_USERNAME (
             type: plainText
@@ -109,6 +112,9 @@ page 4 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -123,6 +129,9 @@ page 4 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column EVENT_ID (
@@ -135,6 +144,9 @@ page 4 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -149,6 +161,9 @@ page 4 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column EVENT_TYPE (
@@ -161,6 +176,9 @@ page 4 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -175,6 +193,9 @@ page 4 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column TO_STATUS (
@@ -188,139 +209,14 @@ page 4 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: G
+            }
         )
 
-    )
-
-    pageItem P4_REQUEST_ID (
-        type: hidden
-        layout {
-            sequence: 10
-            region: @request-overview
-            slot: regionBody
-        }
-        sessionState {
-            storage: session
-        }
-    )
-
-    pageItem P4_EMPLOYEE_NAME (
-        type: displayOnly
-        label {
-            label: Employee
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 20
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
-    pageItem P4_DEPARTMENT (
-        type: displayOnly
-        label {
-            label: Department
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 30
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
-    pageItem P4_LEAVE_TYPE (
-        type: displayOnly
-        label {
-            label: Leave Category
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 40
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
-    pageItem P4_DATES_DISPLAY (
-        type: displayOnly
-        label {
-            label: Leave Duration
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 50
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
-    pageItem P4_STATUS (
-        type: displayOnly
-        label {
-            label: Current Status
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 60
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
-    pageItem P4_REASON (
-        type: displayOnly
-        label {
-            label: Employee Justification
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 70
-            region: @request-overview
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
         }
     )
 
@@ -364,26 +260,132 @@ page 4 (
         }
     )
 
-    button back (
-        buttonName: BACK
-        label: Back to Requests
+    pageItem P4_DATES_DISPLAY (
+        type: displayOnly
+        label {
+            label: Leave Duration
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
         layout {
-            sequence: 10
-            region: @decision-form
-            slot: close
+            sequence: 50
+            region: @request-overview
+            slot: regionBody
         }
         appearance {
-            buttonTemplate: @/text
+            template: @/optional-floating
             templateOptions: #DEFAULT#
-            icon: fa-chevron-left
         }
-        behavior {
-            type: standard
-            action: redirectThisApp
-            target: {
-                page: 3
-            }
-            warnOnUnsavedChanges: doNotCheck
+    )
+
+    pageItem P4_DEPARTMENT (
+        type: displayOnly
+        label {
+            label: Department
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 30
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_EMPLOYEE_NAME (
+        type: displayOnly
+        label {
+            label: Employee
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_LEAVE_TYPE (
+        type: displayOnly
+        label {
+            label: Leave Category
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 40
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_REASON (
+        type: displayOnly
+        label {
+            label: Employee Justification
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 70
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P4_REQUEST_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @request-overview
+            slot: regionBody
+        }
+    )
+
+    pageItem P4_STATUS (
+        type: displayOnly
+        label {
+            label: Current Status
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 60
+            region: @request-overview
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
         }
     )
 
@@ -401,11 +403,30 @@ page 4 (
             templateOptions: #DEFAULT#
             icon: fa-check
         }
-        behavior {
-            type: standard
-        }
         security {
             authorizationScheme: @can-approve-request
+        }
+    )
+
+    button back (
+        buttonName: BACK
+        label: Back to Requests
+        layout {
+            sequence: 10
+            region: @decision-form
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 3
+            }
+            warnOnUnsavedChanges: doNotCheck
         }
     )
 
@@ -422,8 +443,41 @@ page 4 (
             templateOptions: #DEFAULT#
             icon: fa-times
         }
-        behavior {
-            type: standard
+        security {
+            authorizationScheme: @can-approve-request
+        }
+    )
+
+    process approve-request (
+        name: Approve Leave Request
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => to_number(:P4_REQUEST_ID),
+                        p_actor_username => :APP_USER,
+                        p_outcome        => 'APPROVED',
+                        p_comments       => :P4_APPROVER_COMMENTS
+                    );
+                    commit;
+                    apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was approved successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Leave request approved successfully.
+        }
+        advanced {
+            executionMappingIdentifier: 8632135134069156
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: APPROVE
         }
         security {
             authorizationScheme: @can-approve-request
@@ -469,38 +523,8 @@ page 4 (
             sequence: 5
             point: beforeHeader
         }
-    )
-
-    process approve-request (
-        name: Approve Leave Request
-        type: executeCode
-        source {
-            plsqlCode:
-                ```plsql
-                begin
-                    hr_workflow_pkg.manager_outcome(
-                        p_request_id     => to_number(:P4_REQUEST_ID),
-                        p_actor_username => :APP_USER,
-                        p_outcome        => 'APPROVED',
-                        p_comments       => :P4_APPROVER_COMMENTS
-                    );
-                    commit;
-                    apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was approved successfully.';
-                end;
-                ```
-        }
-        execution {
-            sequence: 10
-        }
-        successMessage {
-            successMessage: Leave request approved successfully.
-        }
-        serverSideCondition {
-            type: requestIsContainedInValue
-            value: APPROVE
-        }
-        security {
-            authorizationScheme: @can-approve-request
+        advanced {
+            executionMappingIdentifier: 8632094302069156
         }
     )
 
@@ -528,6 +552,9 @@ page 4 (
         successMessage {
             successMessage: Leave request was rejected.
         }
+        advanced {
+            executionMappingIdentifier: 8632281134069156
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: REJECT
@@ -538,4 +565,3 @@ page 4 (
     )
 
 )
-

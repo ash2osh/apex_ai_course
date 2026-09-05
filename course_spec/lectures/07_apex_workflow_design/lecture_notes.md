@@ -95,31 +95,84 @@ By the end of this lecture, viewers will understand:
 ---
 
 ## 💻 PL/SQL Workflow Starter Code
+
+### Calling from App 100 Submit Process (Page 4)
 ```sql
-procedure start_leave_workflow(
-    p_request_id in number
-) is
+declare
+    l_request_id  number;
     l_workflow_id number;
-BEGIN
-    l_workflow_id := hr_workflow_pkg.start_leave_approval(
-        p_request_id => p_request_id
+    l_start_date  date;
+    l_end_date    date;
+begin
+    begin
+        l_start_date := to_date(:P4_START_DATE, 'YYYY-MM-DD');
+    exception when others then
+        l_start_date := to_date(:P4_START_DATE);
+    end;
+    begin
+        l_end_date := to_date(:P4_END_DATE, 'YYYY-MM-DD');
+    exception when others then
+        l_end_date := to_date(:P4_END_DATE);
+    end;
+
+    hr_leave_pkg.create_request(
+        p_username        => :APP_USER,
+        p_leave_type_code => :P4_LEAVE_TYPE_CODE,
+        p_start_date      => l_start_date,
+        p_end_date        => l_end_date,
+        p_reason          => :P4_REASON,
+        p_request_id      => l_request_id
     );
-end start_leave_workflow;
+
+    l_workflow_id := hr_workflow_pkg.start_leave_approval(
+        p_request_id => l_request_id
+    );
+
+    :P4_REQUEST_ID  := l_request_id;
+    :P4_WORKFLOW_ID := l_workflow_id;
+    commit;
+    apex_application.g_print_success_message := 'Leave request #' || l_request_id || ' submitted successfully.';
+end;
 ```
 
-`HR_WORKFLOW_PKG` owns the APEX 26.1 call. It passes `p_application_id => 200`, `p_static_id => 'LEAVE_APPROVAL'`, and indexed `APEX_WORKFLOW.T_WORKFLOW_PARAMETER` records, then stores the returned workflow instance ID.
+### Native Workflow Initiation in `HR_WORKFLOW_PKG`
+`HR_WORKFLOW_PKG.start_leave_approval` owns the APEX 26.1 call. It passes `p_application_id => 200`, `p_static_id => 'leave-approval'`, and indexed `APEX_WORKFLOW.T_WORKFLOW_PARAMETER` records, then stores the returned workflow instance ID in `HR_LEAVE_REQUESTS`:
+
+```sql
+l_params(1) := apex_workflow.t_workflow_parameter(
+    static_id    => 'P_REQUEST_ID',
+    string_value => to_char(p_request_id)
+);
+
+l_workflow_id := apex_workflow.start_workflow(
+    p_application_id => 200,
+    p_static_id      => 'leave-approval',
+    p_parameters     => l_params,
+    p_initiator      => coalesce(apex_application.g_user, l_username, sys_context('USERENV', 'SESSION_USER')),
+    p_detail_pk      => to_char(p_request_id)
+);
+
+update hr_leave_requests
+   set workflow_id = l_workflow_id
+ where request_id = p_request_id;
+```
 
 ---
 
 ## 🖥️ Live Demo Script
-1. In APEX App Builder $\to$ Shared Components $\to$ Workflows $\to$ Create `LEAVE_APPROVAL`.
-2. Add variables (`REQUEST_ID`, `EMPLOYEE_ID`, `REQUESTED_DAYS`).
-3. Add activities: Execute Code (Validate), True/False Condition (Balance Check).
-4. Run test submission from Employee App $\to$ Check APEX Workflow Monitor to see the instance executing.
+1. In APEX App Builder (App 200) $\to$ Shared Components $\to$ Workflows $\to$ Create `LEAVE_APPROVAL` (Static ID: `leave-approval`).
+2. Add input parameter `P_REQUEST_ID` (Number, Required).
+3. Select version `v1` $\to$ Set Status to **Active** (crucial for runtime execution).
+4. Add activities: Execute Code (Validate), True/False Condition (Balance Check).
+5. Run test submission from Employee App (Page 4) $\to$ Check APEX Workflow Monitor to see the instance executing.
 
 ---
 
 ## ❓ Common Questions & Pitfalls
+* **Q: Why does `apex_workflow.start_workflow` fail with `ORA-20987: Workflow leave-approval has no Active version`?**
+  * *A*: A newly created workflow version in APEX starts in `Development` status. In APEX App Builder, open the workflow version `v1` and change the status from **Development** to **Active**.
+* **Q: Why does `apex_workflow.start_workflow` fail with `ORA-01403: no data found`?**
+  * *A*: APEX generates a slugified static ID (such as `leave-approval` instead of uppercase `LEAVE_APPROVAL`). Verify `STATIC_ID` in `APEX_APPL_WORKFLOWS`.
 * **Q: What happens if the database crashes while a workflow is running?**
   * *A*: APEX Workflows are transactional and database-native. Active states and variables are persisted automatically.
 

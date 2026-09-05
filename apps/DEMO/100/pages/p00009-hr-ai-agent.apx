@@ -6,36 +6,17 @@ page 9 (
         pageTemplate: @/standard
         templateOptions: #DEFAULT#
     }
-    navigation {
-        cursorFocus: firstItemOnPage
-    }
     security {
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
 
-    region breadcrumb (
-        name: HR AI Agent
-        type: breadcrumb
-        layout {
-            sequence: 10
-            slot: breadcrumbBar
-        }
-        appearance {
-            template: @/title-bar
-            templateOptions: #DEFAULT#
-        }
-        componentAppearance {
-            breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
-        }
-    )
-
     region agent-banner (
         name: Autonomous Employee HR AI Agent
         type: staticContent
+        source {
+            htmlCode: <p><strong>HR AI Agent (EMPLOYEE_HR_AGENT):</strong> Equipped with 7 package-backed declarative AI tools to check profiles, query balances, calculate working days, submit leave requests, and cancel eligible requests on your behalf.</p>
+        }
         layout {
             sequence: 20
             slot: body
@@ -47,39 +28,6 @@ page 9 (
                 t-Alert--success
                 t-Alert--horizontal
             ]
-        }
-        source {
-            htmlCode:
-                ```html
-                <p><strong>HR AI Agent (EMPLOYEE_HR_AGENT):</strong> Equipped with 7 package-backed declarative AI tools to check profiles, query balances, calculate working days, submit leave requests, and cancel eligible requests on your behalf.</p>
-                ```
-        }
-    )
-
-    region tools-catalog (
-        name: Approved AI Tools
-        type: staticContent
-        layout {
-            sequence: 30
-            slot: body
-        }
-        appearance {
-            template: @/collapsible
-            templateOptions: #DEFAULT#
-        }
-        source {
-            htmlCode:
-                ```html
-                <ul>
-                  <li><code>GET_MY_PROFILE</code>: Retrieves your authenticated employee profile.</li>
-                  <li><code>GET_LEAVE_BALANCE</code>: Returns available, used, and pending days.</li>
-                  <li><code>GET_MY_LEAVE_REQUESTS</code>: Returns your personal leave requests.</li>
-                  <li><code>GET_LEAVE_REQUEST</code>: Retrieves full details of a specific request owned by you.</li>
-                  <li><code>CALCULATE_LEAVE_DAYS</code>: Computes requested working days between two dates.</li>
-                  <li><code>CREATE_LEAVE_REQUEST</code>: Submits a new leave request and triggers workflow (requires confirmation).</li>
-                  <li><code>CANCEL_LEAVE_REQUEST</code>: Cancels an owned pending request (requires confirmation).</li>
-                </ul>
-                ```
         }
     )
 
@@ -96,6 +44,72 @@ page 9 (
                 #DEFAULT#
                 t-Region--scrollBody
             ]
+        }
+    )
+
+    region breadcrumb (
+        name: HR AI Agent
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+
+    region tools-catalog (
+        name: Approved AI Tools
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <ul>
+                  <li><code>GET_MY_PROFILE</code>: Retrieves your authenticated employee profile.</li>
+                  <li><code>GET_LEAVE_BALANCE</code>: Returns available, used, and pending days.</li>
+                  <li><code>GET_MY_LEAVE_REQUESTS</code>: Returns your personal leave requests.</li>
+                  <li><code>GET_LEAVE_REQUEST</code>: Retrieves full details of a specific request owned by you.</li>
+                  <li><code>CALCULATE_LEAVE_DAYS</code>: Computes requested working days between two dates.</li>
+                  <li><code>CREATE_LEAVE_REQUEST</code>: Submits a new leave request and triggers workflow (requires confirmation).</li>
+                  <li><code>CANCEL_LEAVE_REQUEST</code>: Cancels an owned pending request (requires confirmation).</li>
+                </ul>
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/collapsible
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P9_AGENT_RESPONSE (
+        type: displayOnly
+        label {
+            label: Agent Response & Tool Execution Log
+            alignment: left
+        }
+        settings {
+            sendOnPageSubmit: false
+        }
+        layout {
+            sequence: 20
+            region: @agent-chat
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
         }
     )
 
@@ -122,26 +136,6 @@ page 9 (
         }
     )
 
-    pageItem P9_AGENT_RESPONSE (
-        type: displayOnly
-        label {
-            label: Agent Response & Tool Execution Log
-            alignment: left
-        }
-        settings {
-            sendOnPageSubmit: false
-        }
-        layout {
-            sequence: 20
-            region: @agent-chat
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-    )
-
     button send (
         buttonName: SEND
         label: Send to Agent
@@ -155,9 +149,6 @@ page 9 (
             hot: true
             templateOptions: #DEFAULT#
             icon: fa-paper-plane
-        }
-        behavior {
-            type: standard
         }
     )
 
@@ -184,6 +175,9 @@ page 9 (
         }
         execution {
             sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 8618982860068574
         }
         serverSideCondition {
             type: requestIsContainedInValue

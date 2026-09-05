@@ -18,6 +18,9 @@ page 10 (
     region breadcrumb (
         name: Users
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -29,8 +32,21 @@ page 10 (
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
         }
-        source {
-            breadcrumb: @breadcrumb
+    )
+
+    region user-form (
+        name: Manage User Account
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
         }
     )
 
@@ -71,6 +87,9 @@ page 10 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8642209531069179
+        }
 
         column CREATED_AT (
             type: plainText
@@ -82,6 +101,9 @@ page 10 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -96,6 +118,9 @@ page 10 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column EMAIL (
@@ -108,6 +133,9 @@ page 10 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -122,6 +150,9 @@ page 10 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column MANAGER_NAME (
@@ -134,6 +165,9 @@ page 10 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -148,6 +182,9 @@ page 10 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column UPDATED_AT (
@@ -161,6 +198,9 @@ page 10 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: G
+            }
         )
 
         column USERNAME (
@@ -171,14 +211,14 @@ page 10 (
             layout {
                 sequence: 20
             }
+            columnFormatting {
+                htmlExpression: <a href="f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:10:P10_USER_ID,P10_USERNAME,P10_FULL_NAME,P10_EMAIL,P10_DEPARTMENT_ID,P10_MANAGER_ID,P10_ACTIVE_YN:#USER_ID#,#USERNAME#,#FULL_NAME#,#EMAIL#,#DEPARTMENT_ID#,#MANAGER_ID#,#ACTIVE_YN#">#USERNAME#</a>
+            }
             source {
                 dataType: STRING
             }
-            columnFormatting {
-                htmlExpression:
-                    ```html
-                    <a href="f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:10:P10_USER_ID,P10_USERNAME,P10_FULL_NAME,P10_EMAIL,P10_DEPARTMENT_ID,P10_MANAGER_ID,P10_ACTIVE_YN:#USER_ID#,#USERNAME#,#FULL_NAME#,#EMAIL#,#DEPARTMENT_ID#,#MANAGER_ID#,#ACTIVE_YN#">#USERNAME#</a>
-                    ```
+            advanced {
+                endUserAlias: H
             }
         )
 
@@ -193,32 +233,190 @@ page 10 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_AT (
+                sequence: 8
+            )
+
+            displayColumn DEPARTMENT_NAME (
+                sequence: 5
+            )
+
+            displayColumn EMAIL (
+                sequence: 4
+            )
+
+            displayColumn FULL_NAME (
+                sequence: 3
+            )
+
+            displayColumn MANAGER_NAME (
+                sequence: 6
+            )
+
+            displayColumn STATUS (
+                sequence: 7
+            )
+
+            displayColumn UPDATED_AT (
+                sequence: 9
+            )
+
+            displayColumn USERNAME (
+                sequence: 2
+            )
+
+            displayColumn USER_ID (
+                sequence: 1
+            )
+
         )
 
     )
 
-    region user-form (
-        name: Manage User Account
-        type: staticContent
+    pageItem P10_ACTIVE_YN (
+        type: selectList
+        label {
+            label: Active Status
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
+        }
         layout {
-            sequence: 30
-            slot: body
+            sequence: 70
+            region: @user-form
+            slot: regionBody
         }
         appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--accent1
-            ]
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        default {
+            type: static
+            staticValue: Y
         }
     )
 
-    pageItem P10_USER_ID (
-        type: hidden
+    pageItem P10_DEPARTMENT_ID (
+        type: selectList
+        label {
+            label: Department
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @departments
+        }
         layout {
-            sequence: 10
+            sequence: 50
             region: @user-form
             slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P10_EMAIL (
+        type: textField
+        label {
+            label: Email Address
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P10_FULL_NAME (
+        type: textField
+        label {
+            label: Full Name
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P10_MANAGER_ID (
+        type: selectList
+        label {
+            label: Direct Manager
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @employees
+        }
+        layout {
+            sequence: 60
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P10_PASSWORD (
+        type: password
+        label {
+            label: Password
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @user-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        help {
+            helpText: Set initial password for new users (defaults to 'oracle' if left blank) or new password when editing.
         }
     )
 
@@ -245,155 +443,12 @@ page 10 (
         }
     )
 
-    pageItem P10_FULL_NAME (
-        type: textField
-        label {
-            label: Full Name
-            alignment: left
-        }
-        layout {
-            sequence: 30
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        validation {
-            valueRequired: true
-        }
-    )
-
-    pageItem P10_EMAIL (
-        type: textField
-        label {
-            label: Email Address
-            alignment: left
-        }
-        layout {
-            sequence: 40
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        validation {
-            valueRequired: true
-        }
-    )
-
-    pageItem P10_DEPARTMENT_ID (
-        type: selectList
-        label {
-            label: Department
-            alignment: left
-        }
-        layout {
-            sequence: 50
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @departments
-            displayNullValue: true
-        }
-    )
-
-    pageItem P10_MANAGER_ID (
-        type: selectList
-        label {
-            label: Direct Manager
-            alignment: left
-        }
-        layout {
-            sequence: 60
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @employees
-            displayNullValue: true
-        }
-    )
-
-    pageItem P10_ACTIVE_YN (
-        type: selectList
-        label {
-            label: Active Status
-            alignment: left
-        }
-        layout {
-            sequence: 70
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @yes-no
-            displayNullValue: false
-        }
-        default {
-            type: static
-            staticValue: "Y"
-        }
-        validation {
-            valueRequired: true
-        }
-    )
-
-    pageItem P10_PASSWORD (
-        type: password
-        label {
-            label: Password
-            alignment: left
-        }
-        layout {
-            sequence: 80
-            region: @user-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        help {
-            helpText: Set initial password for new users (defaults to 'oracle' if left blank) or new password when editing.
-        }
-    )
-
-    button save-user (
-        buttonName: SAVE_USER
-        label: Save User
+    pageItem P10_USER_ID (
+        type: hidden
         layout {
             sequence: 10
             region: @user-form
-            slot: next
-        }
-        appearance {
-            buttonTemplate: @/text
-            hot: true
-            templateOptions: #DEFAULT#
-            icon: fa-save
-        }
-        behavior {
-            type: standard
+            slot: regionBody
         }
     )
 
@@ -411,13 +466,28 @@ page 10 (
             icon: fa-undo
         }
         behavior {
-            type: standard
             action: redirectThisApp
             target: {
                 page: 10
                 clearCache: 10
             }
             warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button save-user (
+        buttonName: SAVE_USER
+        label: Save User
+        layout {
+            sequence: 10
+            region: @user-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-save
         }
     )
 
@@ -453,11 +523,11 @@ page 10 (
                             coalesce(:APP_USER, user),
                             systimestamp
                         ) returning user_id into l_user_id;
-
+                
                         :P10_USER_ID := to_char(l_user_id);
-
+                
                         hr_auth_pkg.set_password(l_username, l_raw_pass);
-
+                
                         begin
                             select role_id into l_role_id from hr_roles where role_code = 'EMPLOYEE';
                             insert into hr_user_roles (user_id, role_id, created_by, created_at)
@@ -465,7 +535,7 @@ page 10 (
                         exception
                             when others then null;
                         end;
-
+                
                         apex_application.g_print_success_message := 'Employee ' || l_username || ' created successfully with EMPLOYEE role.';
                     else
                         update hr_users
@@ -477,11 +547,11 @@ page 10 (
                                updated_by    = coalesce(:APP_USER, user),
                                updated_at    = systimestamp
                          where user_id = l_user_id;
-
+                
                         if :P10_PASSWORD is not null and length(trim(:P10_PASSWORD)) > 0 then
                             hr_auth_pkg.set_password(l_username, :P10_PASSWORD);
                         end if;
-
+                
                         apex_application.g_print_success_message := 'User ' || l_username || ' updated successfully.';
                     end if;
                     commit;
@@ -500,6 +570,9 @@ page 10 (
         successMessage {
             successMessage: User saved successfully.
         }
+        advanced {
+            executionMappingIdentifier: 8644557696069204
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: SAVE_USER
@@ -507,4 +580,3 @@ page 10 (
     )
 
 )
-

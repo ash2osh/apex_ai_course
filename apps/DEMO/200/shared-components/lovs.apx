@@ -1,7 +1,24 @@
+lov all-users (
+    name: ALL_USERS
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select full_name || ' (' || username || ')' || case when active_yn = 'N' then ' [Inactive]' end as d,
+                   to_char(user_id) as r
+              from hr_users
+             order by full_name
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
 lov balance-years (
     name: BALANCE_YEARS
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -40,7 +57,6 @@ lov boolean (
 lov departments (
     name: DEPARTMENTS
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -60,7 +76,6 @@ lov departments (
 lov employees (
     name: EMPLOYEES
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -80,7 +95,6 @@ lov employees (
 lov leave-types (
     name: LEAVE_TYPES
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -103,16 +117,16 @@ lov request-statuses (
         location: staticValues
     }
 
-    entry submitted (
-        sequence: 5
-        display: Submitted
-        return: SUBMITTED
+    entry approved (
+        sequence: 30
+        display: Approved
+        return: APPROVED
     )
 
-    entry pending-manager-approval (
-        sequence: 10
-        display: Pending Manager Approval
-        return: PENDING_MANAGER_APPROVAL
+    entry cancelled (
+        sequence: 50
+        display: Cancelled
+        return: CANCELLED
     )
 
     entry pending-hr-approval (
@@ -121,10 +135,10 @@ lov request-statuses (
         return: PENDING_HR_APPROVAL
     )
 
-    entry approved (
-        sequence: 30
-        display: Approved
-        return: APPROVED
+    entry pending-manager-approval (
+        sequence: 10
+        display: Pending Manager Approval
+        return: PENDING_MANAGER_APPROVAL
     )
 
     entry rejected (
@@ -133,10 +147,10 @@ lov request-statuses (
         return: REJECTED
     )
 
-    entry cancelled (
-        sequence: 50
-        display: Cancelled
-        return: CANCELLED
+    entry submitted (
+        sequence: 5
+        display: Submitted
+        return: SUBMITTED
     )
 
     entry workflow-error (
@@ -150,7 +164,6 @@ lov request-statuses (
 lov roles (
     name: ROLES
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -166,17 +179,203 @@ lov roles (
     }
 )
 
+lov unified-task-list-lov-due (
+    name: UNIFIED_TASK_LIST.LOV.DUE
+    source {
+        location: staticValues
+    }
+
+    entry 0 (
+        sequence: 1
+        display: Overdue
+        return: |0
+    )
+
+    entry 0-1 (
+        sequence: 2
+        display: Next hour
+        return: 0|1
+    )
+
+    entry 1-24 (
+        sequence: 3
+        display: Next 24 hours
+        return: 1|24
+    )
+
+    entry 168-720 (
+        sequence: 5
+        display: Next 30 days
+        return: 168|720
+    )
+
+    entry 24-168 (
+        sequence: 4
+        display: Next 7 days
+        return: 24|168
+    )
+
+    entry 720 (
+        sequence: 6
+        display: More than 30 days
+        return: 720|
+    )
+
+)
+
+lov unified-task-list-lov-initiated (
+    name: UNIFIED_TASK_LIST.LOV.INITIATED
+    source {
+        location: staticValues
+    }
+
+    entry 1 (
+        sequence: 1
+        display: Last hour
+        return: |1
+    )
+
+    entry 1-24 (
+        sequence: 2
+        display: Last 24 hours
+        return: 1|24
+    )
+
+    entry 168-720 (
+        sequence: 4
+        display: Last 30 days
+        return: 168|720
+    )
+
+    entry 24-168 (
+        sequence: 3
+        display: Last 7 days
+        return: 24|168
+    )
+
+    entry 720 (
+        sequence: 5
+        display: Older than 30 days
+        return: 720|
+    )
+
+)
+
+lov unified-task-list-lov-priority (
+    name: UNIFIED_TASK_LIST.LOV.PRIORITY
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select disp,
+                   val
+              from table ( apex_human_task.get_lov_priority )
+             order by insert_order
+            ```
+    }
+    columnMapping {
+        return: VAL
+        display: DISP
+    }
+)
+
+lov unified-task-list-lov-state (
+    name: UNIFIED_TASK_LIST.LOV.STATE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select disp,
+                   val
+              from table ( apex_human_task.get_lov_state )
+             order by insert_order
+            ```
+    }
+    columnMapping {
+        return: VAL
+        display: DISP
+    }
+)
+
+lov unified-task-list-lov-type (
+    name: UNIFIED_TASK_LIST.LOV.TYPE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select disp,
+                   val
+              from table ( apex_human_task.get_lov_type )
+             order by insert_order
+            ```
+    }
+    columnMapping {
+        return: VAL
+        display: DISP
+    }
+)
+
+lov workflow-console-lov-initiated (
+    name: WORKFLOW_CONSOLE.LOV.INITIATED
+    source {
+        location: staticValues
+    }
+
+    entry 1 (
+        sequence: 1
+        display: Last hour
+        return: |1
+    )
+
+    entry 1-24 (
+        sequence: 2
+        display: Last 24 hours
+        return: 1|24
+    )
+
+    entry 168-720 (
+        sequence: 4
+        display: Last 30 days
+        return: 168|720
+    )
+
+    entry 24-168 (
+        sequence: 3
+        display: Last 7 days
+        return: 24|168
+    )
+
+    entry 720 (
+        sequence: 5
+        display: Older than 30 days
+        return: 720|
+    )
+
+)
+
+lov workflow-console-lov-workflow-state (
+    name: WORKFLOW_CONSOLE.LOV.WORKFLOW_STATE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select disp,
+                   val
+              from table ( apex_workflow.get_lov_workflow_state )
+             order by insert_order
+            ```
+    }
+    columnMapping {
+        return: VAL
+        display: DISP
+    }
+)
+
 lov yes-no (
     name: YES_NO
     source {
         location: staticValues
     }
-
-    entry yes (
-        sequence: 10
-        display: Yes
-        return: Y
-    )
 
     entry no (
         sequence: 20
@@ -184,23 +383,10 @@ lov yes-no (
         return: N
     )
 
-)
+    entry yes (
+        sequence: 10
+        display: Yes
+        return: Y
+    )
 
-lov all-users (
-    name: ALL_USERS
-    source {
-        location: localDatabase
-        type: sqlQuery
-        sqlQuery:
-            ```sql
-            select full_name || ' (' || username || ')' || case when active_yn = 'N' then ' [Inactive]' end as d,
-                   to_char(user_id) as r
-              from hr_users
-             order by full_name
-            ```
-    }
-    columnMapping {
-        return: R
-        display: D
-    }
 )

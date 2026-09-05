@@ -1,0 +1,133 @@
+taskDefinition leave-manager-approval (
+    name: LEAVE_MANAGER_APPROVAL
+    type: approval
+    task {
+        subject: LEAVE APPROVAL FOR &T_AI_SUMMARY.
+    }
+    advanced {
+        detailsPage: {
+            page: 17
+            items: {
+                P17_TASK_ID: &TASK_ID.
+            }
+            clearCache: 17
+            action: resetPagination
+        }
+    }
+
+    parameter T_AI_SUMMARY (
+        label: T_AI_SUMMARY
+        validation {
+            required: false
+        }
+    )
+
+    parameter T_REQUEST_ID (
+        label: T_REQUEST_ID
+    )
+
+    action on-approved (
+        name: ON APPROVED
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => :T_REQUEST_ID,
+                        p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+                        p_outcome        => 'APPROVED',
+                        p_comments       => :APEX$TASK_COMMENTS
+                    );
+                end;
+                ```
+        }
+        execution {
+            onEvent: complete
+            outcome: approved
+            sequence: 10
+        }
+    )
+
+    action on-cancel (
+        name: ON CANCEL
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => :T_REQUEST_ID,
+                        p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+                        p_outcome        => 'CANCELLED',
+                        p_comments       => :APEX$TASK_COMMENTS
+                    );
+                end;
+                ```
+        }
+        execution {
+            onEvent: cancel
+            sequence: 30
+        }
+    )
+
+    action on-reject (
+        name: ON REJECT
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    hr_workflow_pkg.manager_outcome(
+                        p_request_id     => :T_REQUEST_ID,
+                        p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+                        p_outcome        => 'REJECTED',
+                        p_comments       => :APEX$TASK_COMMENTS
+                    );
+                end;
+                ```
+        }
+        execution {
+            onEvent: complete
+            outcome: rejected
+            sequence: 20
+        }
+    )
+
+    participant (
+        value {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT UPPER(m.username)
+                  FROM hr_leave_requests r
+                  JOIN hr_users e ON e.user_id = r.user_id
+                  JOIN hr_users m ON m.user_id = e.manager_id
+                 WHERE r.request_id = :T_REQUEST_ID
+                   AND m.active_yn = 'Y'
+                ```
+        }
+    )
+
+    participant (
+        type: businessAdministrator
+        value {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                  SELECT DISTINCT UPPER(u.username)
+                  FROM hr_users u
+                  JOIN hr_user_roles ur ON ur.user_id = u.user_id
+                  JOIN hr_roles ro      ON ro.role_id = ur.role_id
+                 WHERE ro.role_code IN ('ADMIN', 'SUPER_ADMIN')
+                   AND u.active_yn = 'Y'
+                   AND u.user_id != (
+                       SELECT req.user_id
+                         FROM hr_leave_requests req
+                        WHERE req.request_id = :T_REQUEST_ID
+                   );
+                ```
+        }
+    )
+
+)

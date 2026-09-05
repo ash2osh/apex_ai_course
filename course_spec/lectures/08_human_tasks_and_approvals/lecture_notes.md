@@ -31,18 +31,71 @@ By the end of this lecture, viewers will understand:
 * **Talking Points**:
   * "A Human Task represents a unit of human work. In APEX, it can be assigned to a specific user, a role, or calculated dynamically from SQL."
 
-### 2. Configuring Task Definition & Potential Owners (03:30 – 08:00)
-* **What to Show**: Shared Components $\to$ Task Definitions:
-  * Potential Owner Expression (SQL Query):
+### 2. Configuring Task Definition, Participants & Actions (03:30 – 09:30)
+* **What to Show**: Shared Components $\to$ Task Definitions $\to$ `LEAVE_MANAGER_APPROVAL`:
+  * **Parameters**: `T_REQUEST_ID` (Number) and `T_AI_SUMMARY` (String).
+  * **Potential Owner Expression (SQL Query)**:
     ```sql
-    SELECT m.username
-      FROM hr_users u
-      JOIN hr_users m ON u.manager_id = m.user_id
-     WHERE u.user_id = :EMPLOYEE_ID
+    SELECT UPPER(m.username)
+      FROM hr_leave_requests r
+      JOIN hr_users e ON e.user_id = r.user_id
+      JOIN hr_users m ON m.user_id = e.manager_id
+     WHERE r.request_id = :T_REQUEST_ID
+       AND m.active_yn = 'Y'
     ```
-  * Task Outcome: `APPROVED` or `REJECTED`.
+  * **Business Administrator Expression (SQL Query)**:
+    ```sql
+    SELECT DISTINCT UPPER(u.username)
+      FROM hr_users u
+      JOIN hr_user_roles ur ON ur.user_id = u.user_id
+      JOIN hr_roles ro      ON ro.role_id = ur.role_id
+     WHERE ro.role_code IN ('ADMIN', 'SUPER_ADMIN')
+       AND u.active_yn = 'Y'
+       AND u.user_id != (
+           SELECT req.user_id
+             FROM hr_leave_requests req
+            WHERE req.request_id = :T_REQUEST_ID
+       );
+    ```
+  * **Task Actions (Execute Code)**:
+    * `ON APPROVED` (Complete / Approved):
+      ```sql
+      begin
+          hr_workflow_pkg.manager_outcome(
+              p_request_id     => :T_REQUEST_ID,
+              p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+              p_outcome        => 'APPROVED',
+              p_comments       => :APEX$TASK_COMMENTS
+          );
+      end;
+      ```
+    * `ON REJECT` (Complete / Rejected):
+      ```sql
+      begin
+          hr_workflow_pkg.manager_outcome(
+              p_request_id     => :T_REQUEST_ID,
+              p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+              p_outcome        => 'REJECTED',
+              p_comments       => :APEX$TASK_COMMENTS
+          );
+      end;
+      ```
+    * `ON CANCEL` (Cancel):
+      ```sql
+      begin
+          hr_workflow_pkg.manager_outcome(
+              p_request_id     => :T_REQUEST_ID,
+              p_actor_username => coalesce(:APEX$TASK_OWNER, :APP_USER),
+              p_outcome        => 'CANCELLED',
+              p_comments       => :APEX$TASK_COMMENTS
+          );
+      end;
+      ```
 * **Talking Points**:
-  * "Because we dynamically query `MANAGER_ID`, when Ahmed (`EMP001`) submits a request, it automatically routes to Sarah (`MGR001`)."
+  * "By using `:T_REQUEST_ID` directly in the participant queries, the task definition dynamically locates the direct manager without hardcoding."
+  * "Business Administrators are active HR Admins, with an anti-self-approval rule excluding the employee submitting the request."
+  * "The three task action handlers invoke `HR_WORKFLOW_PKG.manager_outcome`, which updates `HR_LEAVE_REQUESTS` status (`APPROVED`, `PENDING_HR_APPROVAL`, `REJECTED`, or `CANCELLED`), deducts or releases balance in `HR_LEAVE_BALANCES`, and logs audit events."
+  * "In APEXlang (`.apx`), always use ```plsql for `source.plsqlCode` blocks rather than ```sql."
 
 ### 3. Building the "My Tasks" Inbox (Page 2, App 200) (08:00 – 13:00)
 * **What to Show**: Unified Task List component in Page Designer:

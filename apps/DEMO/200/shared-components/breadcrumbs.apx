@@ -14,45 +14,6 @@ breadcrumb breadcrumb (
         }
     )
 
-    entry my-tasks (
-        name: My Tasks
-        pageNumber: 2
-        execution {
-            sequence: 20
-        }
-        link {
-            target: {
-                page: 2
-            }
-        }
-    )
-
-    entry pending-requests (
-        name: Pending Leave Requests
-        pageNumber: 3
-        execution {
-            sequence: 30
-        }
-        link {
-            target: {
-                page: 3
-            }
-        }
-    )
-
-    entry request-details (
-        name: Leave Request Details
-        pageNumber: 4
-        execution {
-            sequence: 40
-        }
-        link {
-            target: {
-                page: 4
-            }
-        }
-    )
-
     entry employees (
         name: Employees
         pageNumber: 5
@@ -62,6 +23,19 @@ breadcrumb breadcrumb (
         link {
             target: {
                 page: 5
+            }
+        }
+    )
+
+    entry leave-balances (
+        name: Leave Balances
+        pageNumber: 8
+        execution {
+            sequence: 80
+        }
+        link {
+            target: {
+                page: 8
             }
         }
     )
@@ -92,41 +66,54 @@ breadcrumb breadcrumb (
         }
     )
 
-    entry leave-balances (
-        name: Leave Balances
-        pageNumber: 8
+    entry my-tasks (
+        name: My Tasks
+        pageNumber: 2
         execution {
-            sequence: 80
+            sequence: 20
         }
         link {
             target: {
-                page: 8
+                page: 2
             }
         }
     )
 
-    entry workflow-monitor (
-        name: Workflow Monitor
-        pageNumber: 9
+    entry my-tasks-2 (
+        name: MY TASKS
+        pageNumber: 100
         execution {
-            sequence: 90
+            sequence: 10
         }
         link {
             target: {
-                page: 9
+                page: 100
             }
         }
     )
 
-    entry users (
-        name: Users
-        pageNumber: 10
+    entry pending-requests (
+        name: Pending Leave Requests
+        pageNumber: 3
         execution {
-            sequence: 100
+            sequence: 30
         }
         link {
             target: {
-                page: 10
+                page: 3
+            }
+        }
+    )
+
+    entry request-details (
+        name: Leave Request Details
+        pageNumber: 4
+        execution {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 4
             }
         }
     )
@@ -153,6 +140,32 @@ breadcrumb breadcrumb (
         link {
             target: {
                 page: 12
+            }
+        }
+    )
+
+    entry users (
+        name: Users
+        pageNumber: 10
+        execution {
+            sequence: 100
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+    entry workflow-monitor (
+        name: Workflow Monitor
+        pageNumber: 9
+        execution {
+            sequence: 90
+        }
+        link {
+            target: {
+                page: 9
             }
         }
     )

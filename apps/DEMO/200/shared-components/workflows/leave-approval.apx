@@ -1,0 +1,304 @@
+workflow leave-approval (
+    name: LEAVE_APPROVAL
+    title: LEAVE_APPROVAL
+
+    parameter P_REQUEST_ID (
+        label {
+            label: P_REQUEST_ID
+        }
+        parameter {
+            dataType: number
+        }
+        validation {
+            required: true
+        }
+    )
+
+    version v1 (
+        additionalData {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT USER_ID,
+                    LEAVE_TYPE_ID,
+                    START_DATE,
+                    END_DATE,
+                    REQUESTED_DAYS,
+                    REASON,
+                    STATUS,
+                    AI_SUMMARY,
+                    WORKFLOW_ID FROM HR_LEAVE_REQUESTS
+                    WHERE REQUEST_ID = :P_REQUEST_ID;
+                ```
+        }
+
+        activity approval (
+            name: APPROVAL TASK
+            type: humanTaskCreate
+            humanTask {
+                definition: @leave-manager-approval
+            }
+            result {
+                outcome: TASK_OUTCOME
+                owner: APPROVER
+            }
+            layout {
+                sequence: 40
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":1140},\"z\":6}"
+            }
+
+            connection (
+                name: New
+                activity {
+                    to: @check-task-outcome
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":7,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+            parameter (
+                name: @T_AI_SUMMARY
+                value {
+                    type: expression
+                    plsqlExpression: :AI_SUMMARY
+                }
+            )
+
+            parameter (
+                name: @T_REQUEST_ID
+                value {
+                    type: item
+                    item: P_REQUEST_ID
+                }
+            )
+
+        )
+
+        activity check-task-outcome (
+            name: CHECK TASK_OUTCOME
+            type: switch
+            condition {
+                conditionType: expression
+                plsqlExpression: :TASK_OUTCOME = 'APPROVED'
+            }
+            layout {
+                sequence: 50
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":1270},\"z\":8}"
+            }
+
+            connection (
+                name: REJECTED
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @new_1
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"right\",\"args\":{\"dx\":-10,\"dy\":0}},\"target\":{},\"vertices\":[],\"z\":9,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+            connection (
+                name: ACCEPTED
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @new-1_1
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":11,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
+        activity end_1 (
+            name: End
+            type: workflowEnd
+            endState {
+                endState: terminated
+            }
+            layout {
+                sequence: 30
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":1240,\"y\":970}}"
+            }
+        )
+
+        activity have-balance (
+            name: HAVE_BALANCE
+            type: switch
+            condition {
+                conditionType: functionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    DECLARE 
+                    V_AVAILABLE_DAYS NUMBER;
+                    BEGIN
+                    
+                    V_AVAILABLE_DAYS := 
+                     HR_LEAVE_PKG.GET_AVAILABLE_DAYS(
+                     p_user_id       => :USER_ID, p_leave_type_id => :LEAVE_TYPE_ID
+                    );
+                    
+                    IF V_AVAILABLE_DAYS >= :REQUESTED_DAYS THEN
+                    RETURN TRUE;
+                    END IF;
+                    RETURN FALSE;
+                    
+                    
+                    END;
+                    ```
+            }
+            layout {
+                sequence: 20
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":970},\"z\":2}"
+            }
+
+            connection (
+                name: NO BALANCE
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @end_1
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"right\",\"args\":{\"dx\":-10,\"dy\":0}},\"target\":{\"name\":\"topLeft\",\"args\":{\"dx\":\"16.667%\",\"dy\":\"50%\",\"rotate\":true}},\"vertices\":[],\"z\":3,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+            connection (
+                name: BALANCE SUFFECIENT
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @approval
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":4,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
+        activity new-1_1 (
+            name: New_1
+            type: workflowEnd
+            layout {
+                sequence: 70
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":970,\"y\":1440},\"z\":12}"
+            }
+        )
+
+        activity new_1 (
+            name: New
+            type: workflowEnd
+            endState {
+                endState: terminated
+            }
+            layout {
+                sequence: 60
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":1260,\"y\":1270},\"z\":10}"
+            }
+        )
+
+        activity start_1 (
+            name: Start
+            type: workflowStart
+            layout {
+                sequence: 10
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":700,\"y\":970}}"
+            }
+
+            connection (
+                name: New
+                activity {
+                    to: @have-balance
+                }
+                advanced {
+                    diagram: "{\"source\":{\"args\":{\"dx\":\"50%\",\"dy\":\"50%\",\"rotate\":true},\"name\":\"topLeft\"},\"target\":{\"args\":{\"dx\":\"50%\",\"dy\":\"50%\",\"rotate\":true},\"name\":\"topLeft\"},\"vertices\":[],\"z\":1,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
+        variable APPROVER (
+            label {
+                label: Approver
+            }
+        )
+
+        variable TASK_OUTCOME (
+            label {
+                label: TaskOutcome
+            }
+        )
+
+        participant (
+            name: New
+            value {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT UPPER(m.username)
+                      FROM hr_leave_requests r
+                      JOIN hr_users e ON e.user_id = r.user_id
+                      JOIN hr_users m ON m.user_id = e.manager_id
+                     WHERE r.request_id = :P_REQUEST_ID
+                       AND m.active_yn = 'Y'
+                       
+                       UNION 
+                       SELECT UPPER(e.USERNAME)
+                      FROM hr_leave_requests r
+                      JOIN hr_users e ON e.user_id = r.user_id
+                     WHERE r.request_id = :P_REQUEST_ID
+                       AND E.active_yn = 'Y'
+                       
+                       ;
+                    ```
+            }
+        )
+
+        participant (
+            name: New_1
+            type: admin
+            value {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                       SELECT DISTINCT UPPER(u.username)
+                      FROM hr_users u
+                      JOIN hr_user_roles ur ON ur.user_id = u.user_id
+                      JOIN hr_roles ro      ON ro.role_id = ur.role_id
+                     WHERE ro.role_code IN ('ADMIN', 'SUPER_ADMIN')
+                       AND u.active_yn = 'Y'
+                       AND u.user_id != (
+                           SELECT req.user_id
+                             FROM hr_leave_requests req
+                            WHERE req.request_id = :P_REQUEST_ID
+                       );
+                    ```
+            }
+        )
+
+    )
+
+)

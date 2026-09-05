@@ -24,16 +24,10 @@ lov cancellation-reasons (
         location: staticValues
     }
 
-    entry schedule-conflict (
-        sequence: 10
-        display: Schedule Conflict
-        return: SCHEDULE_CONFLICT
-    )
-
-    entry plans-changed (
-        sequence: 20
-        display: Plans Changed
-        return: PLANS_CHANGED
+    entry other (
+        sequence: 50
+        display: Other
+        return: OTHER
     )
 
     entry personal-reasons (
@@ -42,16 +36,22 @@ lov cancellation-reasons (
         return: PERSONAL_REASONS
     )
 
+    entry plans-changed (
+        sequence: 20
+        display: Plans Changed
+        return: PLANS_CHANGED
+    )
+
+    entry schedule-conflict (
+        sequence: 10
+        display: Schedule Conflict
+        return: SCHEDULE_CONFLICT
+    )
+
     entry submitted-by-mistake (
         sequence: 40
         display: Submitted by Mistake
         return: SUBMITTED_BY_MISTAKE
-    )
-
-    entry other (
-        sequence: 50
-        display: Other
-        return: OTHER
     )
 
 )
@@ -59,7 +59,6 @@ lov cancellation-reasons (
 lov leave-types (
     name: LEAVE_TYPES
     source {
-        location: localDatabase
         type: sqlQuery
         sqlQuery:
             ```sql
@@ -82,10 +81,16 @@ lov request-statuses (
         location: staticValues
     }
 
-    entry pending-manager-approval (
-        sequence: 10
-        display: Pending Manager Approval
-        return: PENDING_MANAGER_APPROVAL
+    entry approved (
+        sequence: 30
+        display: Approved
+        return: APPROVED
+    )
+
+    entry cancelled (
+        sequence: 50
+        display: Cancelled
+        return: CANCELLED
     )
 
     entry pending-hr-approval (
@@ -94,22 +99,16 @@ lov request-statuses (
         return: PENDING_HR_APPROVAL
     )
 
-    entry approved (
-        sequence: 30
-        display: Approved
-        return: APPROVED
+    entry pending-manager-approval (
+        sequence: 10
+        display: Pending Manager Approval
+        return: PENDING_MANAGER_APPROVAL
     )
 
     entry rejected (
         sequence: 40
         display: Rejected
         return: REJECTED
-    )
-
-    entry cancelled (
-        sequence: 50
-        display: Cancelled
-        return: CANCELLED
     )
 
     entry workflow-error (

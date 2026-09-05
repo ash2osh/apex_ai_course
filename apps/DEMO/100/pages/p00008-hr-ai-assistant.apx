@@ -6,55 +6,10 @@ page 8 (
         pageTemplate: @/standard
         templateOptions: #DEFAULT#
     }
-    navigation {
-        cursorFocus: firstItemOnPage
-    }
     security {
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
-
-    region breadcrumb (
-        name: HR AI Assistant
-        type: breadcrumb
-        layout {
-            sequence: 10
-            slot: breadcrumbBar
-        }
-        appearance {
-            template: @/title-bar
-            templateOptions: #DEFAULT#
-        }
-        componentAppearance {
-            breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
-        }
-    )
-
-    region guidance-banner (
-        name: About HR Assistant
-        type: staticContent
-        layout {
-            sequence: 20
-            slot: body
-        }
-        appearance {
-            template: @/alert
-            templateOptions: [
-                #DEFAULT#
-                t-Alert--info
-                t-Alert--horizontal
-            ]
-        }
-        source {
-            htmlCode:
-                ```html
-                <p><strong>Conversational HR Assistant:</strong> Ask questions about company leave policy, approval processes, and your personal entitlements. This assistant is read-only and educational. For booking or cancelling leave directly via natural language, use the <strong>HR AI Agent</strong>.</p>
-                ```
-        }
-    )
 
     region assistant-chat (
         name: Ask HR Assistant
@@ -68,6 +23,45 @@ page 8 (
             templateOptions: [
                 #DEFAULT#
                 t-Region--scrollBody
+            ]
+        }
+    )
+
+    region breadcrumb (
+        name: HR AI Assistant
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+
+    region guidance-banner (
+        name: About HR Assistant
+        type: staticContent
+        source {
+            htmlCode: <p><strong>Conversational HR Assistant:</strong> Ask questions about company leave policy, approval processes, and your personal entitlements. This assistant is read-only and educational. For booking or cancelling leave directly via natural language, use the <strong>HR AI Agent</strong>.</p>
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--info
+                t-Alert--horizontal
             ]
         }
     )
@@ -129,9 +123,6 @@ page 8 (
             templateOptions: #DEFAULT#
             icon: fa-paper-plane
         }
-        behavior {
-            type: standard
-        }
     )
 
     button quick-balance (
@@ -146,9 +137,6 @@ page 8 (
             buttonTemplate: @/text
             templateOptions: #DEFAULT#
             icon: fa-calculator
-        }
-        behavior {
-            type: standard
         }
     )
 
@@ -165,9 +153,6 @@ page 8 (
             templateOptions: #DEFAULT#
             icon: fa-clock-o
         }
-        behavior {
-            type: standard
-        }
     )
 
     button quick-policy (
@@ -182,9 +167,6 @@ page 8 (
             buttonTemplate: @/text
             templateOptions: #DEFAULT#
             icon: fa-info-circle
-        }
-        behavior {
-            type: standard
         }
     )
 
@@ -218,6 +200,9 @@ page 8 (
         }
         execution {
             sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 8617914895068573
         }
     )
 

@@ -17,6 +17,9 @@ page 4 (
     region breadcrumb (
         name: Submit Leave Request
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -27,9 +30,6 @@ page 4 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -46,58 +46,6 @@ page 4 (
                 #DEFAULT#
                 t-Region--scrollBody
             ]
-        }
-    )
-
-    pageItem P4_LEAVE_TYPE_CODE (
-        type: selectList
-        label {
-            label: Leave Type
-            alignment: left
-        }
-        layout {
-            sequence: 10
-            region: @leave-request-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @leave-types
-            displayNullValue: true
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Select the type of leave you wish to request.
-        }
-    )
-
-    pageItem P4_START_DATE (
-        type: datePicker
-        label {
-            label: Start Date
-            alignment: left
-        }
-        layout {
-            sequence: 20
-            region: @leave-request-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-            formatMask: YYYY-MM-DD
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Select the first date of your leave period.
         }
     )
 
@@ -122,6 +70,33 @@ page 4 (
         }
         help {
             helpText: Select the final date of your leave period.
+        }
+    )
+
+    pageItem P4_LEAVE_TYPE_CODE (
+        type: selectList
+        label {
+            label: Leave Type
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @leave-types
+        }
+        layout {
+            sequence: 10
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the type of leave you wish to request.
         }
     )
 
@@ -152,8 +127,29 @@ page 4 (
             region: @leave-request-form
             slot: regionBody
         }
-        sessionState {
-            storage: session
+    )
+
+    pageItem P4_START_DATE (
+        type: datePicker
+        label {
+            label: Start Date
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @leave-request-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: YYYY-MM-DD
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Select the first date of your leave period.
         }
     )
 
@@ -163,9 +159,6 @@ page 4 (
             sequence: 60
             region: @leave-request-form
             slot: regionBody
-        }
-        sessionState {
-            storage: session
         }
     )
 
@@ -182,7 +175,6 @@ page 4 (
             templateOptions: #DEFAULT#
         }
         behavior {
-            type: standard
             action: redirectThisApp
             target: {
                 page: 1
@@ -204,9 +196,6 @@ page 4 (
             hot: true
             templateOptions: #DEFAULT#
             icon: fa-paper-plane
-        }
-        behavior {
-            type: standard
         }
     )
 
@@ -232,7 +221,7 @@ page 4 (
                     exception when others then
                         l_end_date := to_date(:P4_END_DATE);
                     end;
-
+                
                     hr_leave_pkg.create_request(
                         p_username        => :APP_USER,
                         p_leave_type_code => :P4_LEAVE_TYPE_CODE,
@@ -257,20 +246,21 @@ page 4 (
         successMessage {
             successMessage: Leave request submitted successfully.
         }
+        advanced {
+            executionMappingIdentifier: 8611631444068561
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: SUBMIT
         }
     )
 
-    branch redirect-to-details (
+    branch (
         name: Go to Request Details
         execution {
             sequence: 10
-            point: afterProcessing
         }
         behavior {
-            type: pageOrUrl
             target: {
                 page: 5
             }

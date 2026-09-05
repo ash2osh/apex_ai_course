@@ -18,6 +18,9 @@ page 7 (
     region breadcrumb (
         name: Leave Types
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -29,8 +32,21 @@ page 7 (
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
         }
-        source {
-            breadcrumb: @breadcrumb
+    )
+
+    region leave-type-form (
+        name: Manage Leave Type
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
         }
     )
 
@@ -65,6 +81,9 @@ page 7 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8635425028069175
+        }
 
         column ACTIVE_YN (
             type: plainText
@@ -76,6 +95,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -90,6 +112,9 @@ page 7 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column DEFAULT_ENTITLEMENT (
@@ -102,6 +127,9 @@ page 7 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -116,6 +144,9 @@ page 7 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column LEAVE_TYPE_CODE (
@@ -126,14 +157,14 @@ page 7 (
             layout {
                 sequence: 20
             }
+            columnFormatting {
+                htmlExpression: <a href="f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:7:P7_LEAVE_TYPE_ID,P7_LEAVE_TYPE_CODE,P7_LEAVE_TYPE_NAME,P7_DEFAULT_ENTITLEMENT,P7_REQUIRES_BALANCE_YN,P7_ACTIVE_YN,P7_DISPLAY_ORDER:#LEAVE_TYPE_ID#,#LEAVE_TYPE_CODE#,#LEAVE_TYPE_NAME#,#DEFAULT_ENTITLEMENT#,#REQUIRES_BALANCE_YN#,#ACTIVE_YN#,#DISPLAY_ORDER#">#LEAVE_TYPE_CODE#</a>
+            }
             source {
                 dataType: STRING
             }
-            columnFormatting {
-                htmlExpression:
-                    ```html
-                    <a href="f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:7:P7_LEAVE_TYPE_ID,P7_LEAVE_TYPE_CODE,P7_LEAVE_TYPE_NAME,P7_DEFAULT_ENTITLEMENT,P7_REQUIRES_BALANCE_YN,P7_ACTIVE_YN,P7_DISPLAY_ORDER:#LEAVE_TYPE_ID#,#LEAVE_TYPE_CODE#,#LEAVE_TYPE_NAME#,#DEFAULT_ENTITLEMENT#,#REQUIRES_BALANCE_YN#,#ACTIVE_YN#,#DISPLAY_ORDER#">#LEAVE_TYPE_CODE#</a>
-                    ```
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -148,6 +179,9 @@ page 7 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column LEAVE_TYPE_NAME (
@@ -160,6 +194,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -174,32 +211,94 @@ page 7 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
-    )
-
-    region leave-type-form (
-        name: Manage Leave Type
-        type: staticContent
-        layout {
-            sequence: 30
-            slot: body
-        }
-        appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--accent1
-            ]
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
         }
     )
 
-    pageItem P7_LEAVE_TYPE_ID (
-        type: hidden
+    pageItem P7_ACTIVE_YN (
+        type: selectList
+        label {
+            label: Active Status
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
+        }
         layout {
-            sequence: 10
+            sequence: 60
             region: @leave-type-form
             slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        default {
+            type: static
+            staticValue: Y
+        }
+    )
+
+    pageItem P7_DEFAULT_ENTITLEMENT (
+        type: numberField
+        label {
+            label: Default Entitlement (Days)
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        default {
+            type: static
+            staticValue: 0
+        }
+        help {
+            helpText: Default annual entitlement in days for new employees.
+        }
+    )
+
+    pageItem P7_DISPLAY_ORDER (
+        type: numberField
+        label {
+            label: Display Order
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @leave-type-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        default {
+            type: static
+            staticValue: 10
         }
     )
 
@@ -226,6 +325,15 @@ page 7 (
         }
     )
 
+    pageItem P7_LEAVE_TYPE_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @leave-type-form
+            slot: regionBody
+        }
+    )
+
     pageItem P7_LEAVE_TYPE_NAME (
         type: textField
         label {
@@ -249,38 +357,16 @@ page 7 (
         }
     )
 
-    pageItem P7_DEFAULT_ENTITLEMENT (
-        type: numberField
-        label {
-            label: Default Entitlement (Days)
-            alignment: left
-        }
-        layout {
-            sequence: 40
-            region: @leave-type-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        default {
-            type: static
-            staticValue: "0"
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Default annual entitlement in days for new employees.
-        }
-    )
-
     pageItem P7_REQUIRES_BALANCE_YN (
         type: selectList
         label {
             label: Requires Balance
             alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @yes-no
+            displayNullValue: false
         }
         layout {
             sequence: 50
@@ -291,89 +377,12 @@ page 7 (
             template: @/optional-floating
             templateOptions: #DEFAULT#
         }
-        lov {
-            type: sharedComponent
-            lov: @yes-no
-            displayNullValue: false
-        }
-        default {
-            type: static
-            staticValue: "Y"
-        }
         validation {
             valueRequired: true
         }
-    )
-
-    pageItem P7_ACTIVE_YN (
-        type: selectList
-        label {
-            label: Active Status
-            alignment: left
-        }
-        layout {
-            sequence: 60
-            region: @leave-type-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        lov {
-            type: sharedComponent
-            lov: @yes-no
-            displayNullValue: false
-        }
         default {
             type: static
-            staticValue: "Y"
-        }
-        validation {
-            valueRequired: true
-        }
-    )
-
-    pageItem P7_DISPLAY_ORDER (
-        type: numberField
-        label {
-            label: Display Order
-            alignment: left
-        }
-        layout {
-            sequence: 70
-            region: @leave-type-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        default {
-            type: static
-            staticValue: "10"
-        }
-        validation {
-            valueRequired: true
-        }
-    )
-
-    button save-leave-type (
-        buttonName: SAVE_LEAVE_TYPE
-        label: Save Leave Type
-        layout {
-            sequence: 10
-            region: @leave-type-form
-            slot: next
-        }
-        appearance {
-            buttonTemplate: @/text
-            hot: true
-            templateOptions: #DEFAULT#
-            icon: fa-save
-        }
-        behavior {
-            type: standard
+            staticValue: Y
         }
     )
 
@@ -391,13 +400,28 @@ page 7 (
             icon: fa-undo
         }
         behavior {
-            type: standard
             action: redirectThisApp
             target: {
                 page: 7
                 clearCache: 7
             }
             warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button save-leave-type (
+        buttonName: SAVE_LEAVE_TYPE
+        label: Save Leave Type
+        layout {
+            sequence: 10
+            region: @leave-type-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-save
         }
     )
 
@@ -458,6 +482,9 @@ page 7 (
         successMessage {
             successMessage: Leave type saved successfully.
         }
+        advanced {
+            executionMappingIdentifier: 8637661830069177
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: SAVE_LEAVE_TYPE
@@ -465,4 +492,3 @@ page 7 (
     )
 
 )
-

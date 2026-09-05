@@ -18,6 +18,9 @@ page 9 (
     region breadcrumb (
         name: Workflow Monitor
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -28,9 +31,6 @@ page 9 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -68,6 +68,9 @@ page 9 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8640973292069178
+        }
 
         column CREATED_AT (
             type: plainText
@@ -79,6 +82,9 @@ page 9 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -93,6 +99,9 @@ page 9 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column EVENT_COUNT (
@@ -105,6 +114,9 @@ page 9 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -119,6 +131,9 @@ page 9 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column REQUESTED_DAYS (
@@ -131,6 +146,9 @@ page 9 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -145,6 +163,9 @@ page 9 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column STATUS (
@@ -157,6 +178,9 @@ page 9 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -171,6 +195,9 @@ page 9 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
         column WORKFLOW_ID (
@@ -184,9 +211,60 @@ page 9 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_AT (
+                sequence: 8
+            )
+
+            displayColumn EMPLOYEE_NAME (
+                sequence: 2
+            )
+
+            displayColumn EVENT_COUNT (
+                sequence: 7
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 3
+            )
+
+            displayColumn REQUESTED_DAYS (
+                sequence: 4
+            )
+
+            displayColumn REQUEST_ID (
+                sequence: 1
+            )
+
+            displayColumn STATUS (
+                sequence: 5
+            )
+
+            displayColumn UPDATED_AT (
+                sequence: 9
+            )
+
+            displayColumn WORKFLOW_ID (
+                sequence: 6
+            )
+
         )
 
     )
 
 )
-

@@ -18,6 +18,9 @@ page 12 (
     region breadcrumb (
         name: System Settings
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -29,8 +32,37 @@ page 12 (
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
         }
-        source {
-            breadcrumb: @breadcrumb
+    )
+
+    region edit-setting-form (
+        name: Configure System Setting
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent1
+            ]
+        }
+    )
+
+    region password-reset-form (
+        name: Super Admin: User Password Management
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--accent2
+            ]
         }
     )
 
@@ -62,6 +94,9 @@ page 12 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8647234527069205
+        }
 
         column CREATED_AT (
             type: plainText
@@ -73,6 +108,9 @@ page 12 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -87,6 +125,9 @@ page 12 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column SETTING_CODE (
@@ -97,14 +138,14 @@ page 12 (
             layout {
                 sequence: 10
             }
+            columnFormatting {
+                htmlExpression: <a href="f?p=&APP_ID.:12:&APP_SESSION.::&DEBUG.:12:P12_SETTING_CODE,P12_SETTING_VALUE,P12_DESCRIPTION:#SETTING_CODE#,#SETTING_VALUE#,#DESCRIPTION#">#SETTING_CODE#</a>
+            }
             source {
                 dataType: STRING
             }
-            columnFormatting {
-                htmlExpression:
-                    ```html
-                    <a href="f?p=&APP_ID.:12:&APP_SESSION.::&DEBUG.:12:P12_SETTING_CODE,P12_SETTING_VALUE,P12_DESCRIPTION:#SETTING_CODE#,#SETTING_VALUE#,#DESCRIPTION#">#SETTING_CODE#</a>
-                    ```
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -119,6 +160,9 @@ page 12 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column UPDATED_AT (
@@ -132,23 +176,80 @@ page 12 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: E
+            }
         )
 
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
     )
 
-    region edit-setting-form (
-        name: Configure System Setting
-        type: staticContent
+    pageItem P12_CONFIRM_PASSWORD (
+        type: password
+        label {
+            label: Confirm New Password
+            alignment: left
+        }
         layout {
             sequence: 30
-            slot: body
+            region: @password-reset-form
+            slot: regionBody
         }
         appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--accent1
-            ]
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Re-type the new password to confirm.
+        }
+    )
+
+    pageItem P12_DESCRIPTION (
+        type: textarea
+        label {
+            label: Setting Description
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @edit-setting-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        help {
+            helpText: Documentation or explanation of this setting parameter.
+        }
+    )
+
+    pageItem P12_NEW_PASSWORD (
+        type: password
+        label {
+            label: New Password
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @password-reset-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            valueRequired: true
+        }
+        help {
+            helpText: Enter the new password.
         }
     )
 
@@ -198,91 +299,16 @@ page 12 (
         }
     )
 
-    pageItem P12_DESCRIPTION (
-        type: textarea
-        label {
-            label: Setting Description
-            alignment: left
-        }
-        layout {
-            sequence: 30
-            region: @edit-setting-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        help {
-            helpText: Documentation or explanation of this setting parameter.
-        }
-    )
-
-    button save-setting (
-        buttonName: SAVE_SETTING
-        label: Save Setting
-        layout {
-            sequence: 10
-            region: @edit-setting-form
-            slot: next
-        }
-        appearance {
-            buttonTemplate: @/text
-            hot: true
-            templateOptions: #DEFAULT#
-            icon: fa-save
-        }
-        behavior {
-            type: standard
-        }
-    )
-
-    button reset-setting (
-        buttonName: RESET_SETTING
-        label: Clear Form
-        layout {
-            sequence: 20
-            region: @edit-setting-form
-            slot: previous
-        }
-        appearance {
-            buttonTemplate: @/text
-            templateOptions: #DEFAULT#
-            icon: fa-undo
-        }
-        behavior {
-            type: standard
-            action: redirectThisApp
-            target: {
-                page: 12
-                clearCache: 12
-            }
-            warnOnUnsavedChanges: doNotCheck
-        }
-    )
-
-    region password-reset-form (
-        name: Super Admin: User Password Management
-        type: staticContent
-        layout {
-            sequence: 40
-            slot: body
-        }
-        appearance {
-            template: @/standard
-            templateOptions: [
-                #DEFAULT#
-                t-Region--accent2
-            ]
-        }
-    )
-
     pageItem P12_TARGET_USER_ID (
         type: selectList
         label {
             label: Select User Account
             alignment: left
         }
+        lov {
+            type: sharedComponent
+            lov: @all-users
+        }
         layout {
             sequence: 10
             region: @password-reset-form
@@ -292,62 +318,11 @@ page 12 (
             template: @/optional-floating
             templateOptions: #DEFAULT#
         }
-        lov {
-            type: sharedComponent
-            lov: @all-users
-            displayNullValue: true
-        }
         validation {
             valueRequired: true
         }
         help {
             helpText: Select the user whose password will be reset.
-        }
-    )
-
-    pageItem P12_NEW_PASSWORD (
-        type: password
-        label {
-            label: New Password
-            alignment: left
-        }
-        layout {
-            sequence: 20
-            region: @password-reset-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Enter the new password.
-        }
-    )
-
-    pageItem P12_CONFIRM_PASSWORD (
-        type: password
-        label {
-            label: Confirm New Password
-            alignment: left
-        }
-        layout {
-            sequence: 30
-            region: @password-reset-form
-            slot: regionBody
-        }
-        appearance {
-            template: @/optional-floating
-            templateOptions: #DEFAULT#
-        }
-        validation {
-            valueRequired: true
-        }
-        help {
-            helpText: Re-type the new password to confirm.
         }
     )
 
@@ -365,8 +340,105 @@ page 12 (
             templateOptions: #DEFAULT#
             icon: fa-key
         }
+    )
+
+    button reset-setting (
+        buttonName: RESET_SETTING
+        label: Clear Form
+        layout {
+            sequence: 20
+            region: @edit-setting-form
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+            icon: fa-undo
+        }
         behavior {
-            type: standard
+            action: redirectThisApp
+            target: {
+                page: 12
+                clearCache: 12
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button save-setting (
+        buttonName: SAVE_SETTING
+        label: Save Setting
+        layout {
+            sequence: 10
+            region: @edit-setting-form
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+            icon: fa-save
+        }
+    )
+
+    process reset-user-password-process (
+        name: Update User Password
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                    l_username varchar2(100);
+                begin
+                    if :P12_TARGET_USER_ID is null then
+                        apex_error.add_error (
+                            p_message          => 'Please select a user account.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                        return;
+                    end if;
+                
+                    if :P12_NEW_PASSWORD is null or length(trim(:P12_NEW_PASSWORD)) < 4 then
+                        apex_error.add_error (
+                            p_message          => 'Password must be at least 4 characters.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                        return;
+                    end if;
+                
+                    if :P12_NEW_PASSWORD != :P12_CONFIRM_PASSWORD then
+                        apex_error.add_error (
+                            p_message          => 'New Password and Confirm Password do not match.',
+                            p_display_location => apex_error.c_inline_in_notification
+                        );
+                        return;
+                    end if;
+                
+                    hr_auth_pkg.assert_super_admin(:APP_USER);
+                
+                    select username
+                      into l_username
+                      from hr_users
+                     where user_id = to_number(:P12_TARGET_USER_ID);
+                
+                    hr_auth_pkg.set_password(l_username, :P12_NEW_PASSWORD);
+                    commit;
+                    apex_application.g_print_success_message := 'Password for user ' || l_username || ' updated successfully.';
+                end;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: Password updated successfully.
+        }
+        advanced {
+            executionMappingIdentifier: 8649613363069206
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: RESET_USER_PASSWORD
         }
     )
 
@@ -399,69 +471,13 @@ page 12 (
         successMessage {
             successMessage: Setting saved successfully.
         }
+        advanced {
+            executionMappingIdentifier: 8649513519069206
+        }
         serverSideCondition {
             type: requestIsContainedInValue
             value: SAVE_SETTING
         }
     )
 
-    process reset-user-password-process (
-        name: Update User Password
-        type: executeCode
-        source {
-            plsqlCode:
-                ```plsql
-                declare
-                    l_username varchar2(100);
-                begin
-                    if :P12_TARGET_USER_ID is null then
-                        apex_error.add_error (
-                            p_message          => 'Please select a user account.',
-                            p_display_location => apex_error.c_inline_in_notification
-                        );
-                        return;
-                    end if;
-
-                    if :P12_NEW_PASSWORD is null or length(trim(:P12_NEW_PASSWORD)) < 4 then
-                        apex_error.add_error (
-                            p_message          => 'Password must be at least 4 characters.',
-                            p_display_location => apex_error.c_inline_in_notification
-                        );
-                        return;
-                    end if;
-
-                    if :P12_NEW_PASSWORD != :P12_CONFIRM_PASSWORD then
-                        apex_error.add_error (
-                            p_message          => 'New Password and Confirm Password do not match.',
-                            p_display_location => apex_error.c_inline_in_notification
-                        );
-                        return;
-                    end if;
-
-                    hr_auth_pkg.assert_super_admin(:APP_USER);
-
-                    select username
-                      into l_username
-                      from hr_users
-                     where user_id = to_number(:P12_TARGET_USER_ID);
-
-                    hr_auth_pkg.set_password(l_username, :P12_NEW_PASSWORD);
-                    commit;
-                    apex_application.g_print_success_message := 'Password for user ' || l_username || ' updated successfully.';
-                end;
-                ```
-        }
-        execution {
-            sequence: 20
-        }
-        successMessage {
-            successMessage: Password updated successfully.
-        }
-        serverSideCondition {
-            type: requestIsContainedInValue
-            value: RESET_USER_PASSWORD
-        }
-    )
-
 )
-

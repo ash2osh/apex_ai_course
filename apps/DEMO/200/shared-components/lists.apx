@@ -77,47 +77,6 @@ list navigation-menu (
         }
         serverSideCondition {
             type: expression
-            language: plsql
-            plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
-        }
-    )
-
-    entry my-tasks (
-        label: My Tasks
-        icon {
-            imageIconCssClasses: fa-tasks
-        }
-        layout {
-            sequence: 20
-        }
-        link {
-            target: {
-                page: 2
-            }
-        }
-        serverSideCondition {
-            type: expression
-            language: plsql
-            plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
-        }
-    )
-
-    entry pending-requests (
-        label: Pending Requests
-        icon {
-            imageIconCssClasses: fa-clock-o
-        }
-        layout {
-            sequence: 30
-        }
-        link {
-            target: {
-                page: 3
-            }
-        }
-        serverSideCondition {
-            type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
         }
     )
@@ -137,47 +96,6 @@ list navigation-menu (
         }
         serverSideCondition {
             type: expression
-            language: plsql
-            plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
-        }
-    )
-
-    entry leave-history (
-        label: Leave History
-        icon {
-            imageIconCssClasses: fa-history
-        }
-        layout {
-            sequence: 50
-        }
-        link {
-            target: {
-                page: 6
-            }
-        }
-        serverSideCondition {
-            type: expression
-            language: plsql
-            plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
-        }
-    )
-
-    entry leave-types (
-        label: Leave Types
-        icon {
-            imageIconCssClasses: fa-tags
-        }
-        layout {
-            sequence: 60
-        }
-        link {
-            target: {
-                page: 7
-            }
-        }
-        serverSideCondition {
-            type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
         }
     )
@@ -197,48 +115,102 @@ list navigation-menu (
         }
         serverSideCondition {
             type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
         }
     )
 
-    entry workflow-monitor (
-        label: Workflow Monitor
+    entry leave-history (
+        label: Leave History
         icon {
-            imageIconCssClasses: fa-heartbeat
+            imageIconCssClasses: fa-history
         }
         layout {
-            sequence: 80
+            sequence: 50
         }
         link {
             target: {
-                page: 9
+                page: 6
             }
         }
         serverSideCondition {
             type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
         }
     )
 
-    entry users (
-        label: Users Administration
+    entry leave-types (
+        label: Leave Types
         icon {
-            imageIconCssClasses: fa-user-plus
+            imageIconCssClasses: fa-tags
         }
         layout {
-            sequence: 90
+            sequence: 60
         }
         link {
             target: {
-                page: 10
+                page: 7
             }
         }
         serverSideCondition {
             type: expression
-            language: plsql
-            plsqlExpression: hr_auth_pkg.is_super_admin(:APP_USER)
+            plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
+        }
+    )
+
+    entry my-tasks (
+        label: My Tasks
+        icon {
+            imageIconCssClasses: fa-tasks
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
+        }
+    )
+
+    entry my-tasks-2 (
+        label: MY TASKS
+        icon {
+            imageIconCssClasses: fa-tasks
+        }
+        layout {
+            sequence: 130
+        }
+        isCurrent {
+            type: pages
+            pages: 100
+        }
+        link {
+            target: {
+                page: 100
+            }
+        }
+    )
+
+    entry pending-requests (
+        label: Pending Requests
+        icon {
+            imageIconCssClasses: fa-clock-o
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 3
+            }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
         }
     )
 
@@ -257,7 +229,6 @@ list navigation-menu (
         }
         serverSideCondition {
             type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_super_admin(:APP_USER)
         }
     )
@@ -277,8 +248,64 @@ list navigation-menu (
         }
         serverSideCondition {
             type: expression
-            language: plsql
             plsqlExpression: hr_auth_pkg.is_super_admin(:APP_USER)
+        }
+    )
+
+    entry users (
+        label: Users Administration
+        icon {
+            imageIconCssClasses: fa-user-plus
+        }
+        layout {
+            sequence: 90
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: hr_auth_pkg.is_super_admin(:APP_USER)
+        }
+    )
+
+    entry workflow-admin (
+        label: workflow admin
+        icon {
+            imageIconCssClasses: fa-workflow
+        }
+        layout {
+            sequence: 120
+        }
+        isCurrent {
+            type: pages
+            pages: 200
+        }
+        link {
+            target: {
+                page: 200
+            }
+        }
+    )
+
+    entry workflow-monitor (
+        label: Workflow Monitor
+        icon {
+            imageIconCssClasses: fa-heartbeat
+        }
+        layout {
+            sequence: 80
+        }
+        link {
+            target: {
+                page: 9
+            }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: hr_auth_pkg.is_admin(:APP_USER)
         }
     )
 

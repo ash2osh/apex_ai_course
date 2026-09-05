@@ -17,6 +17,9 @@ page 7 (
     region breadcrumb (
         name: Workflow Timeline
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -27,9 +30,6 @@ page 7 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -69,6 +69,9 @@ page 7 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8615713967068564
+        }
 
         column ACTOR_USERNAME (
             type: plainText
@@ -80,6 +83,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -94,6 +100,9 @@ page 7 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column EVENT_ID (
@@ -106,6 +115,9 @@ page 7 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -120,6 +132,9 @@ page 7 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column EVENT_TYPE (
@@ -132,6 +147,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -146,6 +164,9 @@ page 7 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column LEAVE_TYPE_NAME (
@@ -158,6 +179,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -172,6 +196,9 @@ page 7 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
         column REQUEST_TITLE (
@@ -184,6 +211,9 @@ page 7 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
             }
         )
 
@@ -198,8 +228,15 @@ page 7 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: J
+            }
         )
 
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
     )
 
 )

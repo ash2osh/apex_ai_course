@@ -18,6 +18,9 @@ page 2 (
     region breadcrumb (
         name: My Tasks
         type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
         layout {
             sequence: 10
             slot: breadcrumbBar
@@ -28,9 +31,6 @@ page 2 (
         }
         componentAppearance {
             breadcrumbTemplate: @/breadcrumb
-        }
-        source {
-            breadcrumb: @breadcrumb
         }
     )
 
@@ -74,6 +74,9 @@ page 2 (
         pagination {
             type: rowRangesXToYOfZ
         }
+        advanced {
+            savedReportMappingIdentifier: 8627011155069134
+        }
 
         column DEPARTMENT_NAME (
             type: plainText
@@ -85,6 +88,9 @@ page 2 (
             }
             source {
                 dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
             }
         )
 
@@ -99,6 +105,9 @@ page 2 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: B
+            }
         )
 
         column END_DATE (
@@ -111,6 +120,9 @@ page 2 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: C
             }
         )
 
@@ -125,6 +137,9 @@ page 2 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: D
+            }
         )
 
         column REQUESTED_DAYS (
@@ -137,6 +152,9 @@ page 2 (
             }
             source {
                 dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
             }
         )
 
@@ -151,6 +169,9 @@ page 2 (
             source {
                 dataType: NUMBER
             }
+            advanced {
+                endUserAlias: F
+            }
         )
 
         column START_DATE (
@@ -163,6 +184,9 @@ page 2 (
             }
             source {
                 dataType: DATE
+            }
+            advanced {
+                endUserAlias: G
             }
         )
 
@@ -177,6 +201,9 @@ page 2 (
             source {
                 dataType: STRING
             }
+            advanced {
+                endUserAlias: H
+            }
         )
 
         column SUBMITTED_DATE (
@@ -190,9 +217,60 @@ page 2 (
             source {
                 dataType: DATE
             }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn DEPARTMENT_NAME (
+                sequence: 3
+            )
+
+            displayColumn EMPLOYEE_NAME (
+                sequence: 2
+            )
+
+            displayColumn END_DATE (
+                sequence: 6
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 4
+            )
+
+            displayColumn REQUESTED_DAYS (
+                sequence: 7
+            )
+
+            displayColumn REQUEST_ID (
+                sequence: 1
+            )
+
+            displayColumn START_DATE (
+                sequence: 5
+            )
+
+            displayColumn STATUS (
+                sequence: 8
+            )
+
+            displayColumn SUBMITTED_DATE (
+                sequence: 9
+            )
+
         )
 
     )
 
 )
-
