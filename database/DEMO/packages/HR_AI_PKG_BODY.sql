@@ -188,10 +188,10 @@
             p_start_date      => p_start_date,
             p_end_date        => p_end_date,
             p_reason          => p_reason,
-            p_request_id      => l_request_id
+            p_request_id      => l_request_id,
+            p_workflow_id     => l_wf_id
         );
 
-        l_wf_id := hr_workflow_pkg.start_leave_approval(p_request_id => l_request_id);
         l_days  := hr_leave_pkg.calculate_days(p_start_date, p_end_date);
 
         RETURN TO_CLOB(JSON_OBJECT(

@@ -14,32 +14,6 @@ breadcrumb breadcrumb (
         }
     )
 
-    entry hr-ai-agent (
-        name: HR AI Agent
-        pageNumber: 9
-        execution {
-            sequence: 90
-        }
-        link {
-            target: {
-                page: 9
-            }
-        }
-    )
-
-    entry hr-ai-assistant (
-        name: HR AI Assistant
-        pageNumber: 8
-        execution {
-            sequence: 80
-        }
-        link {
-            target: {
-                page: 8
-            }
-        }
-    )
-
     entry leave-request-details (
         name: Leave Request Details
         pageNumber: 6

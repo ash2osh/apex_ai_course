@@ -1,0 +1,13 @@
+genAIService open-ai-assistant (
+    name: open ai assistant
+    provider: openai
+    endpointUrl {
+        url: https://api.openai.com/v1
+    }
+    authentication {
+        credentials: @credentials-for-open-ai-assistant
+    }
+    advanced {
+        modelName: gpt-5.4-nano
+    }
+)

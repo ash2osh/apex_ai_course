@@ -104,6 +104,20 @@ page 1 (
 
     )
 
+    region new (
+        name: New
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @welcome-banner
+            slot: subRegions
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
     region quick-actions (
         name: Quick Actions
         type: staticContent
@@ -204,46 +218,37 @@ page 1 (
         }
     )
 
-    button ask-ai-assistant (
-        buttonName: ASK_AI_ASSISTANT
-        label: Ask HR AI Assistant
+    button assistant (
+        buttonName: assistant
+        label: Assistant
         layout {
-            sequence: 30
-            region: @quick-actions
+            sequence: 10
+            region: @new
             slot: regionBody
         }
         appearance {
-            buttonTemplate: @/text
-            templateOptions: #DEFAULT#
-            icon: fa-comments
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-robot
         }
         behavior {
-            action: redirectThisApp
-            target: {
-                page: 8
-            }
+            action: triggerAction
         }
-    )
 
-    button open-ai-agent (
-        buttonName: OPEN_AI_AGENT
-        label: Open HR AI Agent
-        layout {
-            sequence: 40
-            region: @quick-actions
-            slot: regionBody
-        }
-        appearance {
-            buttonTemplate: @/text
-            templateOptions: #DEFAULT#
-            icon: fa-android
-        }
-        behavior {
-            action: redirectThisApp
-            target: {
-                page: 9
+        triggerAction native-open-ai-assistant (
+            action: showAiAssistant
+            genAI {
+                agent: @portal-helper
             }
-        }
+            execution {
+                sequence: 10
+            }
+        )
+
     )
 
     button submit-request (

@@ -27,14 +27,18 @@
         l_requested_days NUMBER;
         l_params         apex_workflow.t_workflow_parameters;
     BEGIN
-        SELECT r.user_id, u.username, m.username, r.requested_days
-          INTO l_user_id, l_username, l_mgr_username, l_requested_days
+        SELECT r.user_id, u.username, m.username, r.requested_days, r.workflow_id
+          INTO l_user_id, l_username, l_mgr_username, l_requested_days, l_workflow_id
           FROM hr_leave_requests r
           JOIN hr_users u ON u.user_id = r.user_id
           LEFT JOIN hr_users m ON m.user_id = u.manager_id
          WHERE r.request_id = p_request_id;
 
-        -- If executed outside an APEX session (e.g., SQLcl or background job), attach a session
+        -- If workflow has already been initiated for this request, return existing instance ID
+        IF l_workflow_id IS NOT NULL THEN
+            RETURN l_workflow_id;
+        END IF;
+
         IF apex_application.g_flow_id IS NULL THEN
             apex_session.create_session(
                 p_app_id   => 200,
@@ -43,13 +47,11 @@
             );
         END IF;
 
-        -- Prepare workflow parameters for App 200 LEAVE_APPROVAL workflow
         l_params(1) := apex_workflow.t_workflow_parameter(
             static_id    => 'P_REQUEST_ID',
             string_value => TO_CHAR(p_request_id)
         );
 
-        -- Start the native APEX workflow instance
         l_workflow_id := apex_workflow.start_workflow(
             p_application_id => 200,
             p_static_id      => 'leave-approval',
@@ -58,12 +60,10 @@
             p_detail_pk      => TO_CHAR(p_request_id)
         );
 
-        -- Update the leave requests table with the new APEX workflow instance ID
         UPDATE hr_leave_requests
            SET workflow_id = l_workflow_id
          WHERE request_id = p_request_id;
 
-        -- Audit trail event
         hr_leave_pkg.record_event(
             p_request_id     => p_request_id,
             p_event_type     => 'WORKFLOW_STARTED',
@@ -84,6 +84,11 @@
     ) IS
         l_requested_days NUMBER;
         l_threshold      NUMBER;
+        l_user_id        NUMBER;
+        l_leave_type_id  NUMBER;
+        l_start_date     DATE;
+        l_status         VARCHAR2(30);
+        l_requires_bal   VARCHAR2(1);
     BEGIN
         IF UPPER(p_outcome) IN ('APPROVED', 'APPROVE') THEN
             l_threshold := TO_NUMBER(get_system_setting('LONG_LEAVE_THRESHOLD', '5'));
@@ -122,6 +127,38 @@
                 p_actor_username => p_actor_username,
                 p_comments       => p_comments
             );
+
+        ELSIF UPPER(p_outcome) IN ('CANCELLED', 'CANCEL') THEN
+            SELECT r.user_id, r.leave_type_id, r.start_date, r.requested_days, r.status,
+                   t.requires_balance_yn
+              INTO l_user_id, l_leave_type_id, l_start_date, l_requested_days, l_status,
+                   l_requires_bal
+              FROM hr_leave_requests r
+              JOIN hr_leave_types t ON t.leave_type_id = r.leave_type_id
+             WHERE r.request_id = p_request_id
+               FOR UPDATE OF r.status;
+
+            IF l_requires_bal = 'Y' THEN
+                UPDATE hr_leave_balances
+                   SET pending_days = GREATEST(0, pending_days - l_requested_days)
+                 WHERE user_id = l_user_id
+                   AND leave_type_id = l_leave_type_id
+                   AND balance_year = EXTRACT(YEAR FROM l_start_date);
+            END IF;
+
+            UPDATE hr_leave_requests
+               SET status = 'CANCELLED'
+             WHERE request_id = p_request_id;
+
+            hr_leave_pkg.record_event(
+                p_request_id     => p_request_id,
+                p_event_type     => 'CANCELLED',
+                p_from_status    => l_status,
+                p_to_status      => 'CANCELLED',
+                p_actor_username => p_actor_username,
+                p_comments       => p_comments
+            );
+
         ELSE
             RAISE_APPLICATION_ERROR(-20030, 'Unknown manager outcome: ' || p_outcome);
         END IF;

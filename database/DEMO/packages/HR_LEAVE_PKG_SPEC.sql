@@ -39,6 +39,16 @@
         p_start_date      IN DATE,
         p_end_date        IN DATE,
         p_reason          IN VARCHAR2 DEFAULT NULL,
+        p_request_id      OUT NUMBER,
+        p_workflow_id     OUT NUMBER
+    );
+
+    PROCEDURE create_request(
+        p_username        IN VARCHAR2,
+        p_leave_type_code IN VARCHAR2,
+        p_start_date      IN DATE,
+        p_end_date        IN DATE,
+        p_reason          IN VARCHAR2 DEFAULT NULL,
         p_request_id      OUT NUMBER
     );
 

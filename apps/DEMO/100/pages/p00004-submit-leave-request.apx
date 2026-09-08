@@ -228,10 +228,8 @@ page 4 (
                         p_start_date      => l_start_date,
                         p_end_date        => l_end_date,
                         p_reason          => :P4_REASON,
-                        p_request_id      => l_request_id
-                    );
-                    l_workflow_id := hr_workflow_pkg.start_leave_approval(
-                        p_request_id => l_request_id
+                        p_request_id      => l_request_id,
+                        p_workflow_id     => l_workflow_id
                     );
                     :P4_REQUEST_ID := l_request_id;
                     :P4_WORKFLOW_ID := l_workflow_id;

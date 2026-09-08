@@ -81,50 +81,6 @@ list navigation-menu (
         }
     )
 
-    entry hr-ai-agent (
-        label: HR AI Agent
-        icon {
-            imageIconCssClasses: fa-android
-        }
-        layout {
-            sequence: 50
-        }
-        link {
-            target: {
-                page: 9
-            }
-        }
-        userDefinedAttributes {
-            1: AI Experience
-        }
-        serverSideCondition {
-            type: expression
-            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
-        }
-    )
-
-    entry hr-ai-assistant (
-        label: HR AI Assistant
-        icon {
-            imageIconCssClasses: fa-comments
-        }
-        layout {
-            sequence: 40
-        }
-        link {
-            target: {
-                page: 8
-            }
-        }
-        userDefinedAttributes {
-            1: AI Experience
-        }
-        serverSideCondition {
-            type: expression
-            plsqlExpression: hr_auth_pkg.is_employee(:APP_USER)
-        }
-    )
-
     entry leave (
         label: Leave
         icon {

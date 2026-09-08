@@ -5,27 +5,21 @@
         p_start_date IN DATE,
         p_end_date   IN DATE
     ) RETURN NUMBER IS
-        l_days  NUMBER := 0;
-        l_curr  DATE;
-        l_day_n NUMBER;
+        l_days NUMBER;
     BEGIN
-        IF p_start_date IS NULL OR p_end_date IS NULL THEN
+        IF p_start_date IS NULL OR p_end_date IS NULL OR p_start_date > p_end_date THEN
             RETURN 0;
         END IF;
 
-        IF TRUNC(p_end_date) < TRUNC(p_start_date) THEN
-            RAISE_APPLICATION_ERROR(-20010, 'End date cannot be prior to start date');
-        END IF;
-
-        l_curr := TRUNC(p_start_date);
-        WHILE l_curr <= TRUNC(p_end_date) LOOP
-            -- 1 = Sunday, 7 = Saturday in standard Oracle format
-            l_day_n := TO_NUMBER(TO_CHAR(l_curr, 'D'));
-            IF l_day_n NOT IN (1, 7) THEN
-                l_days := l_days + 1;
-            END IF;
-            l_curr := l_curr + 1;
-        END LOOP;
+        -- Count working days excluding standard weekend (Friday/Saturday)
+        SELECT COUNT(*)
+          INTO l_days
+          FROM (
+              SELECT p_start_date + LEVEL - 1 AS dt
+                FROM dual
+             CONNECT BY LEVEL <= (TRUNC(p_end_date) - TRUNC(p_start_date) + 1)
+          ) d
+         WHERE TO_CHAR(d.dt, 'DY', 'NLS_DATE_LANGUAGE=ENGLISH') NOT IN ('FRI', 'SAT');
 
         RETURN l_days;
     END calculate_days;
@@ -35,16 +29,19 @@
         p_leave_type_id IN NUMBER,
         p_year          IN NUMBER DEFAULT EXTRACT(YEAR FROM SYSDATE)
     ) RETURN NUMBER IS
-        l_available NUMBER;
+        l_entitlement NUMBER := 0;
+        l_adjustment  NUMBER := 0;
+        l_used        NUMBER := 0;
+        l_pending     NUMBER := 0;
     BEGIN
-        SELECT (entitlement_days + adjustment_days - used_days - pending_days)
-          INTO l_available
+        SELECT entitlement_days, adjustment_days, used_days, pending_days
+          INTO l_entitlement, l_adjustment, l_used, l_pending
           FROM hr_leave_balances
          WHERE user_id = p_user_id
            AND leave_type_id = p_leave_type_id
            AND balance_year = p_year;
 
-        RETURN NVL(l_available, 0);
+        RETURN (l_entitlement + l_adjustment - l_used - l_pending);
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
             RETURN 0;
@@ -80,18 +77,18 @@
         p_end_date           IN DATE,
         p_exclude_request_id IN NUMBER DEFAULT NULL
     ) RETURN BOOLEAN IS
-        l_count PLS_INTEGER;
+        l_cnt NUMBER;
     BEGIN
         SELECT COUNT(*)
-          INTO l_count
+          INTO l_cnt
           FROM hr_leave_requests
          WHERE user_id = p_user_id
-           AND status NOT IN ('REJECTED', 'CANCELLED')
+           AND status NOT IN ('REJECTED', 'CANCELLED', 'WORKFLOW_ERROR')
            AND (p_exclude_request_id IS NULL OR request_id != p_exclude_request_id)
            AND TRUNC(start_date) <= TRUNC(p_end_date)
            AND TRUNC(end_date)   >= TRUNC(p_start_date);
 
-        RETURN (l_count > 0);
+        RETURN (l_cnt > 0);
     END validate_overlap;
 
     PROCEDURE record_event(
@@ -128,7 +125,8 @@
         p_start_date      IN DATE,
         p_end_date        IN DATE,
         p_reason          IN VARCHAR2 DEFAULT NULL,
-        p_request_id      OUT NUMBER
+        p_request_id      OUT NUMBER,
+        p_workflow_id     OUT NUMBER
     ) IS
         l_user_id        NUMBER;
         l_leave_type_id  NUMBER;
@@ -242,6 +240,32 @@
             p_comments       => p_reason
         );
 
+        -- 8. Initiate Approval Workflow and return instance ID
+        p_workflow_id := hr_workflow_pkg.start_leave_approval(
+            p_request_id => p_request_id
+        );
+
+    END create_request;
+
+    PROCEDURE create_request(
+        p_username        IN VARCHAR2,
+        p_leave_type_code IN VARCHAR2,
+        p_start_date      IN DATE,
+        p_end_date        IN DATE,
+        p_reason          IN VARCHAR2 DEFAULT NULL,
+        p_request_id      OUT NUMBER
+    ) IS
+        l_workflow_id NUMBER;
+    BEGIN
+        create_request(
+            p_username        => p_username,
+            p_leave_type_code => p_leave_type_code,
+            p_start_date      => p_start_date,
+            p_end_date        => p_end_date,
+            p_reason          => p_reason,
+            p_request_id      => p_request_id,
+            p_workflow_id     => l_workflow_id
+        );
     END create_request;
 
     PROCEDURE approve_request(
@@ -473,6 +497,16 @@
                     p_adjustment_delta
                 );
         END;
+
+        record_event(
+            p_request_id     => NULL,
+            p_event_type     => 'BALANCE_ADJUSTED',
+            p_from_status    => NULL,
+            p_to_status      => NULL,
+            p_actor_username => p_actor_username,
+            p_comments       => 'Adjusted ' || p_leave_type_code || ' by ' || p_adjustment_delta ||
+                                ' days for user_id ' || p_user_id || ' (Year ' || p_year || '). Reason: ' || p_reason
+        );
 
     END adjust_balance;
 
