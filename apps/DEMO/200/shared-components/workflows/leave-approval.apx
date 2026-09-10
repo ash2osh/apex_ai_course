@@ -19,16 +19,21 @@ workflow leave-approval (
             type: sqlQuery
             sqlQuery:
                 ```sql
-                SELECT USER_ID,
-                    LEAVE_TYPE_ID,
-                    START_DATE,
-                    END_DATE,
-                    REQUESTED_DAYS,
-                    REASON,
-                    STATUS,
-                    AI_SUMMARY,
-                    WORKFLOW_ID FROM HR_LEAVE_REQUESTS
-                    WHERE REQUEST_ID = :P_REQUEST_ID;
+                SELECT r.USER_ID,
+                    u.FULL_NAME AS EMPLOYEE_NAME,
+                    t.LEAVE_TYPE_NAME AS LEAVE_TYPE,
+                    r.LEAVE_TYPE_ID,
+                    r.START_DATE,
+                    r.END_DATE,
+                    r.REQUESTED_DAYS,
+                    r.REASON,
+                    r.REASON AS REQUEST_REASON,
+                    r.STATUS,
+                    r.AI_SUMMARY,
+                    r.WORKFLOW_ID FROM HR_LEAVE_REQUESTS r
+                    JOIN HR_USERS u ON u.USER_ID = r.USER_ID
+                    JOIN HR_LEAVE_TYPES t ON t.LEAVE_TYPE_ID = r.LEAVE_TYPE_ID
+                    WHERE r.REQUEST_ID = :P_REQUEST_ID;
                 ```
         }
 
@@ -133,6 +138,66 @@ workflow leave-approval (
             }
         )
 
+        activity generate-ai-summary (
+            name: GENERATE AI SUMMARY
+            type: executeCode
+            source {
+                location: localDatabase
+                language: plsql
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                        l_prompt  VARCHAR2(4000);
+                        l_summary VARCHAR2(4000);
+                    BEGIN
+                        -- Prompt Template:
+                        -- Summarize this leave request in one clear, concise sentence for the manager:
+                        -- Employee: &EMPLOYEE_NAME., Type: &LEAVE_TYPE., Duration: &REQUESTED_DAYS. days, Reason: &REQUEST_REASON.
+                        l_prompt := 'Summarize this leave request in one clear, concise sentence for the manager: ' ||
+                                    'Employee: ' || :EMPLOYEE_NAME || ', Type: ' || :LEAVE_TYPE || 
+                                    ', Duration: ' || :REQUESTED_DAYS || ' days, Reason: ' || :REQUEST_REASON;
+
+                        BEGIN
+                            l_summary := apex_ai.generate(
+                                p_prompt            => l_prompt,
+                                p_service_static_id => 'open-ai-assistant'
+                            );
+                        EXCEPTION
+                            WHEN OTHERS THEN
+                                l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
+                        END;
+
+                        IF l_summary IS NULL THEN
+                            l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
+                        END IF;
+
+                        :AI_SUMMARY := SUBSTR(l_summary, 1, 4000);
+
+                        UPDATE hr_leave_requests
+                           SET ai_summary = :AI_SUMMARY
+                         WHERE request_id = :P_REQUEST_ID;
+                    END;
+                    ```
+            }
+            layout {
+                sequence: 35
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":1055},\"z\":5}"
+            }
+
+            connection (
+                name: New
+                activity {
+                    to: @approval
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":5,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
         activity have-balance (
             name: HAVE_BALANCE
             type: switch
@@ -184,7 +249,7 @@ workflow leave-approval (
                     when: true
                 }
                 activity {
-                    to: @approval
+                    to: @generate-ai-summary
                 }
                 advanced {
                     diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":4,\"label\":{\"distance\":0.5,\"offset\":0}}"
@@ -238,6 +303,12 @@ workflow leave-approval (
                 }
             )
 
+        )
+
+        variable AI_SUMMARY (
+            label {
+                label: AI_SUMMARY
+            }
         )
 
         variable APPROVER (
