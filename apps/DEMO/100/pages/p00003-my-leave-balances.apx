@@ -183,6 +183,47 @@ page 3 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn AVAILABLE_DAYS (
+                sequence: 7
+            )
+
+            displayColumn BALANCE_YEAR (
+                sequence: 3
+            )
+
+            displayColumn ENTITLEMENT_DAYS (
+                sequence: 4
+            )
+
+            displayColumn LEAVE_TYPE_CODE (
+                sequence: 2
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 1
+            )
+
+            displayColumn PENDING_DAYS (
+                sequence: 6
+            )
+
+            displayColumn UPDATED_AT (
+                sequence: 8
+            )
+
+            displayColumn USED_DAYS (
+                sequence: 5
+            )
+
+        )
+
     )
 
     region breadcrumb (

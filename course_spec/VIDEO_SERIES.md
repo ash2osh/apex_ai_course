@@ -143,15 +143,16 @@ Show:
 - Export
 - Git diff
 
-## Episode 13 — Architecture Refactor
+## Episode 13 — System Debugging & Workflow Recovery
 
-New requirement:
+Production edge cases & recovery:
 
 ```text
-MANAGER must become a separate role from ADMIN.
+Fix employee request cancellation, handle workflow abnormal terminations,
+and recover reserved balances with AI assistance.
 ```
 
-Show dependency discovery and safe refactoring.
+Show systematic log diagnosis, APEX workflow synchronization, and balance reconciliation.
 
 ## Episode 14 — Final End-to-End Demo
 

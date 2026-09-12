@@ -15,6 +15,9 @@ workflow leave-approval (
     )
 
     version v1 (
+        settings {
+            state: active
+        }
         additionalData {
             type: sqlQuery
             sqlQuery:
@@ -82,6 +85,72 @@ workflow leave-approval (
 
         )
 
+        activity check-duration (
+            name: CHECK DURATION > 5
+            type: switch
+            condition {
+                conditionType: expression
+                plsqlExpression: :REQUESTED_DAYS > 5
+            }
+            layout {
+                sequence: 52
+            }
+
+            connection (
+                name: <= 5 DAYS
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @new-1_1
+                }
+            )
+
+            connection (
+                name: > 5 DAYS
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @hr-approval
+                }
+            )
+
+        )
+
+        activity check-hr-outcome (
+            name: CHECK HR TASK OUTCOME
+            type: switch
+            condition {
+                conditionType: expression
+                plsqlExpression: :HR_TASK_OUTCOME = 'APPROVED'
+            }
+            layout {
+                sequence: 56
+            }
+
+            connection (
+                name: REJECTED
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @new_1
+                }
+            )
+
+            connection (
+                name: ACCEPTED
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @new-1_1
+                }
+            )
+
+        )
+
         activity check-task-outcome (
             name: CHECK TASK_OUTCOME
             type: switch
@@ -124,34 +193,132 @@ workflow leave-approval (
 
         )
 
-        activity check-duration (
-            name: CHECK DURATION > 5
-            type: switch
-            condition {
-                conditionType: expression
-                plsqlExpression: :REQUESTED_DAYS > 5
+        activity end_1 (
+            name: End
+            type: workflowEnd
+            endState {
+                endState: terminated
             }
             layout {
-                sequence: 52
+                sequence: 30
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":1240,\"y\":970}}"
+            }
+        )
+
+        activity generate-ai-summary (
+            name: GENERATE AI SUMMARY
+            type: executeCode
+            source {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                        l_prompt  VARCHAR2(4000);
+                        l_summary VARCHAR2(4000);
+                    BEGIN
+                        -- Prompt Template:
+                        -- Summarize this leave request in one clear, concise sentence for the manager:
+                        -- Employee: &EMPLOYEE_NAME., Type: &LEAVE_TYPE., Duration: &REQUESTED_DAYS. days, Reason: &REQUEST_REASON.
+                        l_prompt := 'Summarize this leave request in one clear, concise sentence for the manager: ' ||
+                                    'Employee: ' || :EMPLOYEE_NAME || ', Type: ' || :LEAVE_TYPE || 
+                                    ', Duration: ' || :REQUESTED_DAYS || ' days, Reason: ' || :REQUEST_REASON;
+                    
+                        BEGIN
+                            l_summary := apex_ai.generate(
+                                p_prompt            => l_prompt,
+                                p_service_static_id => 'open-ai-assistant'
+                            );
+                        EXCEPTION
+                            WHEN OTHERS THEN
+                                l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
+                        END;
+                    
+                        IF l_summary IS NULL THEN
+                            l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
+                        END IF;
+                    
+                        :AI_SUMMARY := SUBSTR(l_summary, 1, 4000);
+                    
+                        UPDATE hr_leave_requests
+                           SET ai_summary = :AI_SUMMARY
+                         WHERE request_id = :P_REQUEST_ID;
+                    END;
+                    ```
+            }
+            layout {
+                sequence: 35
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":1055},\"z\":5}"
             }
 
             connection (
-                name: <= 5 DAYS
+                name: New
+                activity {
+                    to: @approval
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":5,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
+        activity have-balance (
+            name: HAVE_BALANCE
+            type: switch
+            condition {
+                conditionType: functionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    DECLARE 
+                        v_available_days NUMBER;
+                    BEGIN
+                        -- CREATE_REQUEST already placed :REQUESTED_DAYS into PENDING_DAYS.
+                        -- (v_available_days + :REQUESTED_DAYS) was the balance at submission time.
+                        v_available_days := HR_LEAVE_PKG.GET_AVAILABLE_DAYS(
+                            p_user_id       => :USER_ID, 
+                            p_leave_type_id => :LEAVE_TYPE_ID
+                        );
+                        
+                        IF (v_available_days + :REQUESTED_DAYS) >= :REQUESTED_DAYS AND v_available_days >= 0 THEN
+                            RETURN TRUE;
+                        END IF;
+                        RETURN FALSE;
+                    END;
+                    ```
+            }
+            layout {
+                sequence: 20
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":890,\"y\":970},\"z\":2}"
+            }
+
+            connection (
+                name: NO BALANCE
                 condition {
                     when: false
                 }
                 activity {
-                    to: @new-1_1
+                    to: @end_1
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"right\",\"args\":{\"dx\":-10,\"dy\":0}},\"target\":{\"name\":\"topLeft\",\"args\":{\"dx\":\"16.667%\",\"dy\":\"50%\",\"rotate\":true}},\"vertices\":[],\"z\":3,\"label\":{\"distance\":0.5,\"offset\":0}}"
                 }
             )
 
             connection (
-                name: > 5 DAYS
+                name: BALANCE SUFFECIENT
                 condition {
                     when: true
                 }
                 activity {
-                    to: @hr-approval
+                    to: @generate-ai-summary
+                }
+                advanced {
+                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":4,\"label\":{\"distance\":0.5,\"offset\":0}}"
                 }
             )
 
@@ -191,173 +358,6 @@ workflow leave-approval (
                 value {
                     type: item
                     item: P_REQUEST_ID
-                }
-            )
-
-        )
-
-        activity check-hr-outcome (
-            name: CHECK HR TASK OUTCOME
-            type: switch
-            condition {
-                conditionType: expression
-                plsqlExpression: :HR_TASK_OUTCOME = 'APPROVED'
-            }
-            layout {
-                sequence: 56
-            }
-
-            connection (
-                name: REJECTED
-                condition {
-                    when: false
-                }
-                activity {
-                    to: @new_1
-                }
-            )
-
-            connection (
-                name: ACCEPTED
-                condition {
-                    when: true
-                }
-                activity {
-                    to: @new-1_1
-                }
-            )
-
-        )
-
-        activity end_1 (
-            name: End
-            type: workflowEnd
-            endState {
-                endState: terminated
-            }
-            layout {
-                sequence: 30
-            }
-            advanced {
-                diagram: "{\"position\":{\"x\":1240,\"y\":970}}"
-            }
-        )
-
-        activity generate-ai-summary (
-            name: GENERATE AI SUMMARY
-            type: executeCode
-            source {
-                location: localDatabase
-                language: plsql
-                plsqlCode:
-                    ```plsql
-                    DECLARE
-                        l_prompt  VARCHAR2(4000);
-                        l_summary VARCHAR2(4000);
-                    BEGIN
-                        -- Prompt Template:
-                        -- Summarize this leave request in one clear, concise sentence for the manager:
-                        -- Employee: &EMPLOYEE_NAME., Type: &LEAVE_TYPE., Duration: &REQUESTED_DAYS. days, Reason: &REQUEST_REASON.
-                        l_prompt := 'Summarize this leave request in one clear, concise sentence for the manager: ' ||
-                                    'Employee: ' || :EMPLOYEE_NAME || ', Type: ' || :LEAVE_TYPE || 
-                                    ', Duration: ' || :REQUESTED_DAYS || ' days, Reason: ' || :REQUEST_REASON;
-
-                        BEGIN
-                            l_summary := apex_ai.generate(
-                                p_prompt            => l_prompt,
-                                p_service_static_id => 'open-ai-assistant'
-                            );
-                        EXCEPTION
-                            WHEN OTHERS THEN
-                                l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
-                        END;
-
-                        IF l_summary IS NULL THEN
-                            l_summary := hr_ai_pkg.generate_request_summary(p_request_id => :P_REQUEST_ID);
-                        END IF;
-
-                        :AI_SUMMARY := SUBSTR(l_summary, 1, 4000);
-
-                        UPDATE hr_leave_requests
-                           SET ai_summary = :AI_SUMMARY
-                         WHERE request_id = :P_REQUEST_ID;
-                    END;
-                    ```
-            }
-            layout {
-                sequence: 35
-            }
-            advanced {
-                diagram: "{\"position\":{\"x\":890,\"y\":1055},\"z\":5}"
-            }
-
-            connection (
-                name: New
-                activity {
-                    to: @approval
-                }
-                advanced {
-                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":5,\"label\":{\"distance\":0.5,\"offset\":0}}"
-                }
-            )
-
-        )
-
-        activity have-balance (
-            name: HAVE_BALANCE
-            type: switch
-            condition {
-                conditionType: functionBody
-                plsqlFunctionBody:
-                    ```plsql
-                    DECLARE 
-                    V_AVAILABLE_DAYS NUMBER;
-                    BEGIN
-                    
-                    V_AVAILABLE_DAYS := 
-                     HR_LEAVE_PKG.GET_AVAILABLE_DAYS(
-                     p_user_id       => :USER_ID, p_leave_type_id => :LEAVE_TYPE_ID
-                    );
-                    
-                    IF V_AVAILABLE_DAYS >= :REQUESTED_DAYS THEN
-                    RETURN TRUE;
-                    END IF;
-                    RETURN FALSE;
-                    
-                    
-                    END;
-                    ```
-            }
-            layout {
-                sequence: 20
-            }
-            advanced {
-                diagram: "{\"position\":{\"x\":890,\"y\":970},\"z\":2}"
-            }
-
-            connection (
-                name: NO BALANCE
-                condition {
-                    when: false
-                }
-                activity {
-                    to: @end_1
-                }
-                advanced {
-                    diagram: "{\"source\":{\"name\":\"right\",\"args\":{\"dx\":-10,\"dy\":0}},\"target\":{\"name\":\"topLeft\",\"args\":{\"dx\":\"16.667%\",\"dy\":\"50%\",\"rotate\":true}},\"vertices\":[],\"z\":3,\"label\":{\"distance\":0.5,\"offset\":0}}"
-                }
-            )
-
-            connection (
-                name: BALANCE SUFFECIENT
-                condition {
-                    when: true
-                }
-                activity {
-                    to: @generate-ai-summary
-                }
-                advanced {
-                    diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":4,\"label\":{\"distance\":0.5,\"offset\":0}}"
                 }
             )
 
@@ -422,12 +422,6 @@ workflow leave-approval (
             }
         )
 
-        variable TASK_OUTCOME (
-            label {
-                label: TaskOutcome
-            }
-        )
-
         variable HR_APPROVER (
             label {
                 label: HrApprover
@@ -437,6 +431,12 @@ workflow leave-approval (
         variable HR_TASK_OUTCOME (
             label {
                 label: HrTaskOutcome
+            }
+        )
+
+        variable TASK_OUTCOME (
+            label {
+                label: TaskOutcome
             }
         )
 
