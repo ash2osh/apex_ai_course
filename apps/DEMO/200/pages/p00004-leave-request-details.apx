@@ -455,12 +455,21 @@ page 4 (
             plsqlCode:
                 ```plsql
                 begin
-                    hr_workflow_pkg.manager_outcome(
-                        p_request_id     => to_number(:P4_REQUEST_ID),
-                        p_actor_username => :APP_USER,
-                        p_outcome        => 'APPROVED',
-                        p_comments       => :P4_APPROVER_COMMENTS
-                    );
+                    if :P4_STATUS = 'PENDING_HR_APPROVAL' then
+                        hr_workflow_pkg.hr_outcome(
+                            p_request_id     => to_number(:P4_REQUEST_ID),
+                            p_actor_username => :APP_USER,
+                            p_outcome        => 'APPROVED',
+                            p_comments       => :P4_APPROVER_COMMENTS
+                        );
+                    else
+                        hr_workflow_pkg.manager_outcome(
+                            p_request_id     => to_number(:P4_REQUEST_ID),
+                            p_actor_username => :APP_USER,
+                            p_outcome        => 'APPROVED',
+                            p_comments       => :P4_APPROVER_COMMENTS
+                        );
+                    end if;
                     commit;
                     apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was approved successfully.';
                 end;
@@ -535,12 +544,21 @@ page 4 (
             plsqlCode:
                 ```plsql
                 begin
-                    hr_workflow_pkg.manager_outcome(
-                        p_request_id     => to_number(:P4_REQUEST_ID),
-                        p_actor_username => :APP_USER,
-                        p_outcome        => 'REJECTED',
-                        p_comments       => :P4_APPROVER_COMMENTS
-                    );
+                    if :P4_STATUS = 'PENDING_HR_APPROVAL' then
+                        hr_workflow_pkg.hr_outcome(
+                            p_request_id     => to_number(:P4_REQUEST_ID),
+                            p_actor_username => :APP_USER,
+                            p_outcome        => 'REJECTED',
+                            p_comments       => :P4_APPROVER_COMMENTS
+                        );
+                    else
+                        hr_workflow_pkg.manager_outcome(
+                            p_request_id     => to_number(:P4_REQUEST_ID),
+                            p_actor_username => :APP_USER,
+                            p_outcome        => 'REJECTED',
+                            p_comments       => :P4_APPROVER_COMMENTS
+                        );
+                    end if;
                     commit;
                     apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was rejected.';
                 end;

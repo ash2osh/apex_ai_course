@@ -104,6 +104,7 @@
         l_actor_id   NUMBER;
         l_req_userid NUMBER;
         l_manager_id NUMBER;
+        l_status     VARCHAR2(30);
         l_actor      VARCHAR2(100);
     BEGIN
         l_actor := NVL(p_actor_username, hr_user_pkg.current_username);
@@ -111,7 +112,7 @@
             RETURN FALSE;
         END IF;
 
-        -- Super Admins and HR Admins can approve company-wide
+        -- Super Admins and HR Admins can approve company-wide at any stage
         IF is_admin(l_actor) THEN
             RETURN TRUE;
         END IF;
@@ -121,14 +122,19 @@
             RETURN FALSE;
         END IF;
 
-        SELECT r.user_id, u.manager_id
-          INTO l_req_userid, l_manager_id
+        SELECT r.user_id, u.manager_id, r.status
+          INTO l_req_userid, l_manager_id, l_status
           FROM hr_leave_requests r
           JOIN hr_users u ON u.user_id = r.user_id
          WHERE r.request_id = p_request_id;
 
-        -- Direct manager of employee
-        IF l_manager_id = l_actor_id THEN
+        -- For secondary HR approval tier, only Admin / HR Admin can approve (already returned above)
+        IF l_status = 'PENDING_HR_APPROVAL' THEN
+            RETURN FALSE;
+        END IF;
+
+        -- Direct manager of employee can approve at manager stage
+        IF l_manager_id = l_actor_id AND l_status IN ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL') THEN
             RETURN TRUE;
         END IF;
 

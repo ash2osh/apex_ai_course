@@ -115,10 +115,115 @@ workflow leave-approval (
                     when: true
                 }
                 activity {
-                    to: @new-1_1
+                    to: @check-duration
                 }
                 advanced {
                     diagram: "{\"source\":{\"name\":\"bottom\",\"args\":{\"dx\":0,\"dy\":-10}},\"target\":{},\"vertices\":[],\"z\":11,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
+            )
+
+        )
+
+        activity check-duration (
+            name: CHECK DURATION > 5
+            type: switch
+            condition {
+                conditionType: expression
+                plsqlExpression: :REQUESTED_DAYS > 5
+            }
+            layout {
+                sequence: 52
+            }
+
+            connection (
+                name: <= 5 DAYS
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @new-1_1
+                }
+            )
+
+            connection (
+                name: > 5 DAYS
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @hr-approval
+                }
+            )
+
+        )
+
+        activity hr-approval (
+            name: HR APPROVAL TASK
+            type: humanTaskCreate
+            humanTask {
+                definition: @leave-hr-approval
+            }
+            result {
+                outcome: HR_TASK_OUTCOME
+                owner: HR_APPROVER
+            }
+            layout {
+                sequence: 54
+            }
+
+            connection (
+                name: New
+                activity {
+                    to: @check-hr-outcome
+                }
+            )
+
+            parameter (
+                name: @T_AI_SUMMARY
+                value {
+                    type: expression
+                    plsqlExpression: :AI_SUMMARY
+                }
+            )
+
+            parameter (
+                name: @T_REQUEST_ID
+                value {
+                    type: item
+                    item: P_REQUEST_ID
+                }
+            )
+
+        )
+
+        activity check-hr-outcome (
+            name: CHECK HR TASK OUTCOME
+            type: switch
+            condition {
+                conditionType: expression
+                plsqlExpression: :HR_TASK_OUTCOME = 'APPROVED'
+            }
+            layout {
+                sequence: 56
+            }
+
+            connection (
+                name: REJECTED
+                condition {
+                    when: false
+                }
+                activity {
+                    to: @new_1
+                }
+            )
+
+            connection (
+                name: ACCEPTED
+                condition {
+                    when: true
+                }
+                activity {
+                    to: @new-1_1
                 }
             )
 
@@ -320,6 +425,18 @@ workflow leave-approval (
         variable TASK_OUTCOME (
             label {
                 label: TaskOutcome
+            }
+        )
+
+        variable HR_APPROVER (
+            label {
+                label: HrApprover
+            }
+        )
+
+        variable HR_TASK_OUTCOME (
+            label {
+                label: HrTaskOutcome
             }
         )
 
