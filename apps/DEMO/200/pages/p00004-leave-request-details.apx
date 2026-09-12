@@ -454,21 +454,44 @@ page 4 (
         source {
             plsqlCode:
                 ```plsql
+                declare
+                    l_task_id number;
                 begin
-                    if :P4_STATUS = 'PENDING_HR_APPROVAL' then
-                        hr_workflow_pkg.hr_outcome(
-                            p_request_id     => to_number(:P4_REQUEST_ID),
-                            p_actor_username => :APP_USER,
-                            p_outcome        => 'APPROVED',
-                            p_comments       => :P4_APPROVER_COMMENTS
+                    begin
+                        select task_id
+                          into l_task_id
+                          from apex_tasks
+                         where application_id = 200
+                           and detail_pk = to_char(:P4_REQUEST_ID)
+                           and state_code in ('UNASSIGNED', 'ASSIGNED')
+                           and rownum = 1;
+                    exception
+                        when others then
+                            l_task_id := null;
+                    end;
+
+                    if l_task_id is not null then
+                        apex_approval.complete_task(
+                            p_task_id  => l_task_id,
+                            p_outcome  => apex_approval.c_outcome_approved,
+                            p_autocommit => false
                         );
                     else
-                        hr_workflow_pkg.manager_outcome(
-                            p_request_id     => to_number(:P4_REQUEST_ID),
-                            p_actor_username => :APP_USER,
-                            p_outcome        => 'APPROVED',
-                            p_comments       => :P4_APPROVER_COMMENTS
-                        );
+                        if :P4_STATUS = 'PENDING_HR_APPROVAL' then
+                            hr_workflow_pkg.hr_outcome(
+                                p_request_id     => to_number(:P4_REQUEST_ID),
+                                p_actor_username => :APP_USER,
+                                p_outcome        => 'APPROVED',
+                                p_comments       => :P4_APPROVER_COMMENTS
+                            );
+                        else
+                            hr_workflow_pkg.manager_outcome(
+                                p_request_id     => to_number(:P4_REQUEST_ID),
+                                p_actor_username => :APP_USER,
+                                p_outcome        => 'APPROVED',
+                                p_comments       => :P4_APPROVER_COMMENTS
+                            );
+                        end if;
                     end if;
                     commit;
                     apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was approved successfully.';
@@ -543,21 +566,44 @@ page 4 (
         source {
             plsqlCode:
                 ```plsql
+                declare
+                    l_task_id number;
                 begin
-                    if :P4_STATUS = 'PENDING_HR_APPROVAL' then
-                        hr_workflow_pkg.hr_outcome(
-                            p_request_id     => to_number(:P4_REQUEST_ID),
-                            p_actor_username => :APP_USER,
-                            p_outcome        => 'REJECTED',
-                            p_comments       => :P4_APPROVER_COMMENTS
+                    begin
+                        select task_id
+                          into l_task_id
+                          from apex_tasks
+                         where application_id = 200
+                           and detail_pk = to_char(:P4_REQUEST_ID)
+                           and state_code in ('UNASSIGNED', 'ASSIGNED')
+                           and rownum = 1;
+                    exception
+                        when others then
+                            l_task_id := null;
+                    end;
+
+                    if l_task_id is not null then
+                        apex_approval.complete_task(
+                            p_task_id  => l_task_id,
+                            p_outcome  => apex_approval.c_outcome_rejected,
+                            p_autocommit => false
                         );
                     else
-                        hr_workflow_pkg.manager_outcome(
-                            p_request_id     => to_number(:P4_REQUEST_ID),
-                            p_actor_username => :APP_USER,
-                            p_outcome        => 'REJECTED',
-                            p_comments       => :P4_APPROVER_COMMENTS
-                        );
+                        if :P4_STATUS = 'PENDING_HR_APPROVAL' then
+                            hr_workflow_pkg.hr_outcome(
+                                p_request_id     => to_number(:P4_REQUEST_ID),
+                                p_actor_username => :APP_USER,
+                                p_outcome        => 'REJECTED',
+                                p_comments       => :P4_APPROVER_COMMENTS
+                            );
+                        else
+                            hr_workflow_pkg.manager_outcome(
+                                p_request_id     => to_number(:P4_REQUEST_ID),
+                                p_actor_username => :APP_USER,
+                                p_outcome        => 'REJECTED',
+                                p_comments       => :P4_APPROVER_COMMENTS
+                            );
+                        end if;
                     end if;
                     commit;
                     apex_application.g_print_success_message := 'Leave request #' || :P4_REQUEST_ID || ' was rejected.';

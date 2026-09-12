@@ -40,6 +40,7 @@ page 17 (
             ```
     }
     security {
+        authorizationScheme: @is-manager-or-admin
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
@@ -2308,7 +2309,7 @@ page 17 (
         label: Add Comment
         layout {
             sequence: 10
-            region: @comments
+            region: @buttons
             slot: edit
         }
         appearance {
@@ -2340,7 +2341,7 @@ page 17 (
         label: Submit Information
         layout {
             sequence: 20
-            region: @comments
+            region: @buttons
             slot: edit
         }
         appearance {

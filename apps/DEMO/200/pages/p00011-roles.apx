@@ -121,15 +121,24 @@ page 11 (
         )
 
         column REVOKE_ACTION (
-            type: plainText
+            type: link
             heading {
                 heading: Action
             }
             layout {
                 sequence: 90
             }
-            columnFormatting {
-                htmlExpression: <a class="t-Button t-Button--danger t-Button--simple t-Button--tiny" href="f?p=&APP_ID.:11:&APP_SESSION.:REVOKE_ROLE:&DEBUG.:11:P11_REVOKE_USER_ROLE_ID:#USER_ROLE_ID#">Revoke</a>
+            link {
+                target: {
+                    page: 11
+                    request: REVOKE_ROLE
+                    items: {
+                        P11_REVOKE_USER_ROLE_ID: #USER_ROLE_ID#
+                    }
+                    clearCache: 11
+                }
+                linkText: Revoke
+                linkAttributes: class="t-Button t-Button--danger t-Button--simple t-Button--tiny"
             }
             source {
                 dataType: STRING
@@ -442,25 +451,7 @@ page 11 (
                     l_count number;
                 begin
                     if :P11_REVOKE_USER_ROLE_ID is not null then
-                        select count(*)
-                          into l_count
-                          from hr_user_roles ur
-                          join hr_roles r on r.role_id = ur.role_id
-                         where r.role_code = 'SUPER_ADMIN'
-                           and ur.user_role_id = to_number(:P11_REVOKE_USER_ROLE_ID);
-                        
-                        if l_count > 0 then
-                            select count(*)
-                              into l_count
-                              from hr_user_roles ur
-                              join hr_roles r on r.role_id = ur.role_id
-                             where r.role_code = 'SUPER_ADMIN';
-                            
-                            if l_count <= 1 then
-                                raise_application_error(-20020, 'Cannot revoke the last SUPER_ADMIN role assignment in the system.');
-                            end if;
-                        end if;
-                
+                        hr_auth_pkg.assert_can_revoke_role(to_number(:P11_REVOKE_USER_ROLE_ID));
                         delete from hr_user_roles where user_role_id = to_number(:P11_REVOKE_USER_ROLE_ID);
                         commit;
                         apex_application.g_print_success_message := 'Role assignment revoked successfully.';

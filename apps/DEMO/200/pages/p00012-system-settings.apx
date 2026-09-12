@@ -131,15 +131,24 @@ page 12 (
         )
 
         column SETTING_CODE (
-            type: plainText
+            type: link
             heading {
                 heading: Setting Key
             }
             layout {
                 sequence: 10
             }
-            columnFormatting {
-                htmlExpression: <a href="f?p=&APP_ID.:12:&APP_SESSION.::&DEBUG.:12:P12_SETTING_CODE,P12_SETTING_VALUE,P12_DESCRIPTION:#SETTING_CODE#,#SETTING_VALUE#,#DESCRIPTION#">#SETTING_CODE#</a>
+            link {
+                target: {
+                    page: 12
+                    items: {
+                        P12_SETTING_CODE: #SETTING_CODE#
+                        P12_SETTING_VALUE: #SETTING_VALUE#
+                        P12_DESCRIPTION: #DESCRIPTION#
+                    }
+                    clearCache: 12
+                }
+                linkText: #SETTING_CODE#
             }
             source {
                 dataType: STRING

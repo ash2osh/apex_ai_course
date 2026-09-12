@@ -150,15 +150,28 @@ page 7 (
         )
 
         column LEAVE_TYPE_CODE (
-            type: plainText
+            type: link
             heading {
                 heading: Code
             }
             layout {
                 sequence: 20
             }
-            columnFormatting {
-                htmlExpression: <a href="f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:7:P7_LEAVE_TYPE_ID,P7_LEAVE_TYPE_CODE,P7_LEAVE_TYPE_NAME,P7_DEFAULT_ENTITLEMENT,P7_REQUIRES_BALANCE_YN,P7_ACTIVE_YN,P7_DISPLAY_ORDER:#LEAVE_TYPE_ID#,#LEAVE_TYPE_CODE#,#LEAVE_TYPE_NAME#,#DEFAULT_ENTITLEMENT#,#REQUIRES_BALANCE_YN#,#ACTIVE_YN#,#DISPLAY_ORDER#">#LEAVE_TYPE_CODE#</a>
+            link {
+                target: {
+                    page: 7
+                    items: {
+                        P7_LEAVE_TYPE_ID: #LEAVE_TYPE_ID#
+                        P7_LEAVE_TYPE_CODE: #LEAVE_TYPE_CODE#
+                        P7_LEAVE_TYPE_NAME: #LEAVE_TYPE_NAME#
+                        P7_DEFAULT_ENTITLEMENT: #DEFAULT_ENTITLEMENT#
+                        P7_REQUIRES_BALANCE_YN: #REQUIRES_BALANCE_YN#
+                        P7_ACTIVE_YN: #ACTIVE_YN#
+                        P7_DISPLAY_ORDER: #DISPLAY_ORDER#
+                    }
+                    clearCache: 7
+                }
+                linkText: #LEAVE_TYPE_CODE#
             }
             source {
                 dataType: STRING

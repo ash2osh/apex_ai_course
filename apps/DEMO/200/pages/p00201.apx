@@ -16,6 +16,7 @@ page 201 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-admin
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }

@@ -1,5 +1,41 @@
+-- =============================================================================
+-- Migration: 07_update_hr_auth_pkg.sql
+-- Description: Update HR_AUTH_PKG package specification and body:
+--              1. Enforce that direct hierarchy managers must possess the MANAGER role.
+--              2. Add guards to prevent deactivation or role revocation of the last active SUPER_ADMIN.
+-- Fixes: High Finding 9, High Finding 11
+-- Note: Password rules remain in classroom demo mode per user instruction.
+-- =============================================================================
+SET DEFINE OFF;
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_AUTH_PKG" AS
+PROMPT Updating HR_AUTH_PKG SPECIFICATION ...
+
+CREATE OR REPLACE EDITIONABLE PACKAGE "DEMO"."HR_AUTH_PKG" AS
+    FUNCTION hash_password(p_username IN VARCHAR2, p_password IN VARCHAR2, p_salt IN VARCHAR2) RETURN VARCHAR2;
+    PROCEDURE set_password(p_username IN VARCHAR2, p_password IN VARCHAR2);
+    FUNCTION authenticate(p_username IN VARCHAR2, p_password IN VARCHAR2) RETURN BOOLEAN;
+
+    FUNCTION has_role(p_username IN VARCHAR2, p_role_code IN VARCHAR2) RETURN BOOLEAN;
+    FUNCTION is_employee(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;
+    FUNCTION is_manager(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;
+    FUNCTION is_admin(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;
+    FUNCTION is_super_admin(p_username IN VARCHAR2 DEFAULT NULL) RETURN BOOLEAN;
+    FUNCTION can_approve_request(p_actor_username IN VARCHAR2, p_request_id IN NUMBER) RETURN BOOLEAN;
+    FUNCTION can_cancel_request(p_actor_username IN VARCHAR2, p_request_id IN NUMBER) RETURN BOOLEAN;
+
+    PROCEDURE assert_role(p_username IN VARCHAR2, p_role_code IN VARCHAR2);
+    PROCEDURE assert_admin(p_username IN VARCHAR2);
+    PROCEDURE assert_super_admin(p_username IN VARCHAR2);
+
+    -- Super-Admin lockout protection guards
+    PROCEDURE assert_can_deactivate_user(p_user_id IN NUMBER);
+    PROCEDURE assert_can_revoke_role(p_user_role_id IN NUMBER);
+END hr_auth_pkg;
+/
+
+PROMPT Updating HR_AUTH_PKG BODY ...
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_AUTH_PKG" AS
 
     FUNCTION hash_password(p_username IN VARCHAR2, p_password IN VARCHAR2, p_salt IN VARCHAR2) RETURN VARCHAR2 IS
         l_hash VARCHAR2(512);
@@ -286,3 +322,6 @@
 
 END hr_auth_pkg;
 /
+
+PROMPT HR_AUTH_PKG updated successfully.
+

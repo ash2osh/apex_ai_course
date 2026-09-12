@@ -10,6 +10,7 @@ page 1 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-employee
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
@@ -48,8 +49,8 @@ page 1 (
                        b.entitlement_days,
                        b.used_days,
                        b.pending_days,
-                       (b.entitlement_days - b.used_days - b.pending_days) as available_days,
-                       'Available: ' || to_char(b.entitlement_days - b.used_days - b.pending_days) || ' days' as available_display,
+                       (b.entitlement_days + b.adjustment_days - b.used_days - b.pending_days) as available_days,
+                       'Available: ' || to_char(b.entitlement_days + b.adjustment_days - b.used_days - b.pending_days) || ' days' as available_display,
                        'Entitlement: ' || to_char(b.entitlement_days) || ' | Used: ' || to_char(b.used_days) || ' | Pending: ' || to_char(b.pending_days) as usage_display,
                        case t.leave_type_code
                          when 'ANNUAL' then 'fa-calendar'

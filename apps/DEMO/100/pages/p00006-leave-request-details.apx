@@ -10,6 +10,7 @@ page 6 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-employee
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
@@ -65,7 +66,9 @@ page 6 (
                        e.comments,
                        e.event_timestamp
                   from hr_leave_request_events e
+                  join hr_leave_requests r on r.request_id = e.request_id
                  where e.request_id = to_number(:P6_REQUEST_ID)
+                   and r.user_id = hr_user_pkg.current_user_id
                  order by e.event_timestamp asc
                 ```
             pageItemsToSubmit: P6_REQUEST_ID
@@ -454,7 +457,8 @@ page 6 (
                                    r.ai_summary
                               from hr_leave_requests r
                               join hr_leave_types t on t.leave_type_id = r.leave_type_id
-                             where r.request_id = to_number(:P6_REQUEST_ID)
+                              where r.request_id = to_number(:P6_REQUEST_ID)
+                                and r.user_id = hr_user_pkg.current_user_id
                         ) loop
                             :P6_REQ_DETAILS := 'Request #' || r.request_id || ' - ' || r.leave_type_name || ' [' || r.status || ']';
                             :P6_DATES_DISPLAY := to_char(r.start_date, 'YYYY-MM-DD') || ' to ' || to_char(r.end_date, 'YYYY-MM-DD') || ' (' || r.requested_days || ' working days)';

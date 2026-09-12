@@ -103,8 +103,11 @@ taskDefinition leave-manager-approval (
                   FROM hr_leave_requests r
                   JOIN hr_users e ON e.user_id = r.user_id
                   JOIN hr_users m ON m.user_id = e.manager_id
+                  JOIN hr_user_roles ur ON ur.user_id = m.user_id
+                  JOIN hr_roles ro ON ro.role_id = ur.role_id
                  WHERE r.request_id = :T_REQUEST_ID
                    AND m.active_yn = 'Y'
+                   AND ro.role_code = 'MANAGER'
                 ```
         }
     )

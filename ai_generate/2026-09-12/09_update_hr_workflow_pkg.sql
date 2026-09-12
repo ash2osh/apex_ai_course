@@ -1,5 +1,17 @@
+-- =============================================================================
+-- Migration: 09_update_hr_workflow_pkg.sql
+-- Description: Update HR_WORKFLOW_PKG specification and body:
+--              1. Raise explicit error on workflow start failure instead of discarding.
+--              2. Lock request and balances with FOR UPDATE during manager outcomes.
+--              3. Authorize caller via can_approve_request.
+--              4. Enforce idempotency: prevent transitions from terminal states.
+-- Fixes: High Finding 3, High Finding 6
+-- =============================================================================
+SET DEFINE OFF;
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_WORKFLOW_PKG" AS
+PROMPT Updating HR_WORKFLOW_PKG BODY ...
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_WORKFLOW_PKG" AS
 
     FUNCTION get_system_setting(
         p_setting_code   IN VARCHAR2,
@@ -273,3 +285,6 @@
 
 END hr_workflow_pkg;
 /
+
+PROMPT HR_WORKFLOW_PKG updated successfully.
+

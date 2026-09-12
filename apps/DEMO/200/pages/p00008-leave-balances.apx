@@ -138,15 +138,24 @@ page 8 (
         )
 
         column EMPLOYEE_NAME (
-            type: plainText
+            type: link
             heading {
                 heading: Employee
             }
             layout {
                 sequence: 20
             }
-            columnFormatting {
-                htmlExpression: <a href="f?p=&APP_ID.:8:&APP_SESSION.::&DEBUG.:8:P8_USER_ID,P8_LEAVE_TYPE_CODE,P8_YEAR:#USER_ID#,#LEAVE_TYPE_CODE#,#BALANCE_YEAR#">#EMPLOYEE_NAME#</a>
+            link {
+                target: {
+                    page: 8
+                    items: {
+                        P8_USER_ID: #USER_ID#
+                        P8_LEAVE_TYPE_CODE: #LEAVE_TYPE_CODE#
+                        P8_YEAR: #BALANCE_YEAR#
+                    }
+                    clearCache: 8
+                }
+                linkText: #EMPLOYEE_NAME#
             }
             source {
                 dataType: STRING

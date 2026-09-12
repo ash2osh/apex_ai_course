@@ -177,7 +177,7 @@ list navigation-menu (
     )
 
     entry my-tasks-2 (
-        label: MY TASKS
+        label: Unified Tasks
         icon {
             imageIconCssClasses: fa-tasks
         }
@@ -192,6 +192,10 @@ list navigation-menu (
             target: {
                 page: 100
             }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: hr_auth_pkg.is_manager(:APP_USER) or hr_auth_pkg.is_admin(:APP_USER)
         }
     )
 

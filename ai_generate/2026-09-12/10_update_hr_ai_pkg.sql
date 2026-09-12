@@ -1,5 +1,16 @@
+-- =============================================================================
+-- Migration: 10_update_hr_ai_pkg.sql
+-- Description: Update HR_AI_PKG body:
+--              1. Enforce caller ownership / admin predicate in generate_request_summary.
+--              2. Add SAVEPOINT and ROLLBACK TO SAVEPOINT on AI wrappers.
+--              3. Generate valid JSON for all error responses using JSON_OBJECT.
+-- Fixes: Critical Finding 1, Medium Finding 17
+-- =============================================================================
+SET DEFINE OFF;
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_AI_PKG" AS
+PROMPT Updating HR_AI_PKG BODY ...
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_AI_PKG" AS
 
     FUNCTION get_my_profile RETURN CLOB IS
         l_user_id NUMBER;
@@ -283,3 +294,6 @@
 
 END hr_ai_pkg;
 /
+
+PROMPT HR_AI_PKG updated successfully.
+

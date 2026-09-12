@@ -10,6 +10,7 @@ page 4 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-employee
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
@@ -231,6 +232,10 @@ page 4 (
                         p_request_id      => l_request_id,
                         p_workflow_id     => l_workflow_id
                     );
+                    if l_workflow_id is null then
+                        rollback;
+                        raise_application_error(-20035, 'Workflow could not be started for request #' || l_request_id || '. Submission rolled back.');
+                    end if;
                     :P4_REQUEST_ID := l_request_id;
                     :P4_WORKFLOW_ID := l_workflow_id;
                     commit;

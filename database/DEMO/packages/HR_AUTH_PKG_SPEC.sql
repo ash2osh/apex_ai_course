@@ -15,5 +15,9 @@
     PROCEDURE assert_role(p_username IN VARCHAR2, p_role_code IN VARCHAR2);
     PROCEDURE assert_admin(p_username IN VARCHAR2);
     PROCEDURE assert_super_admin(p_username IN VARCHAR2);
+
+    -- Super-Admin lockout protection guards
+    PROCEDURE assert_can_deactivate_user(p_user_id IN NUMBER);
+    PROCEDURE assert_can_revoke_role(p_user_role_id IN NUMBER);
 END hr_auth_pkg;
 /

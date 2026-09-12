@@ -10,6 +10,7 @@ page 100 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-manager-or-admin
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }

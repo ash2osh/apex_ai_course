@@ -10,6 +10,7 @@ page 1 (
         cursorFocus: doNotFocusCursor
     }
     security {
+        authorizationScheme: @is-manager-or-admin
         pageAccessProtection: argumentsMustHaveChecksum
         formAutoComplete: false
     }
@@ -58,7 +59,7 @@ page 1 (
                        'u-color-4' as card_color
                   from hr_leave_requests
                  where status = 'APPROVED'
-                   and created_at >= trunc(sysdate, 'MM')
+                   and coalesce(updated_at, created_at) >= trunc(sysdate, 'MM')
                 union all
                 select 'REJECTED_MONTH' as card_key,
                        'Rejected This Month' as card_title,
@@ -68,7 +69,7 @@ page 1 (
                        'u-color-7' as card_color
                   from hr_leave_requests
                  where status = 'REJECTED'
-                   and created_at >= trunc(sysdate, 'MM')
+                   and coalesce(updated_at, created_at) >= trunc(sysdate, 'MM')
                 union all
                 select 'CURRENT_LEAVE' as card_key,
                        'Currently on Leave' as card_title,

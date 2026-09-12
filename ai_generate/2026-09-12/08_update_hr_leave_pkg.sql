@@ -1,5 +1,18 @@
+-- =============================================================================
+-- Migration: 08_update_hr_leave_pkg.sql
+-- Description: Update HR_LEAVE_PKG specification and body:
+--              1. Enforce EMPLOYEE role validation on request creation.
+--              2. Block multi-calendar-year requests (cross-year boundary).
+--              3. Serialize concurrent employee requests with row locks before overlap validation.
+--              4. Explicitly lock HR_LEAVE_BALANCES with FOR UPDATE in approve/reject/cancel.
+--              5. Reaffirm available days calculation including adjustment_days.
+-- Fixes: High Finding 8, Medium Finding 14, Medium Finding 16
+-- =============================================================================
+SET DEFINE OFF;
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_LEAVE_PKG" AS
+PROMPT Updating HR_LEAVE_PKG BODY ...
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "DEMO"."HR_LEAVE_PKG" AS
 
     FUNCTION calculate_days(
         p_start_date IN DATE,
@@ -599,3 +612,6 @@
 
 END hr_leave_pkg;
 /
+
+PROMPT HR_LEAVE_PKG updated successfully.
+

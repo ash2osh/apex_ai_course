@@ -204,15 +204,28 @@ page 10 (
         )
 
         column USERNAME (
-            type: plainText
+            type: link
             heading {
                 heading: Username
             }
             layout {
                 sequence: 20
             }
-            columnFormatting {
-                htmlExpression: <a href="f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:10:P10_USER_ID,P10_USERNAME,P10_FULL_NAME,P10_EMAIL,P10_DEPARTMENT_ID,P10_MANAGER_ID,P10_ACTIVE_YN:#USER_ID#,#USERNAME#,#FULL_NAME#,#EMAIL#,#DEPARTMENT_ID#,#MANAGER_ID#,#ACTIVE_YN#">#USERNAME#</a>
+            link {
+                target: {
+                    page: 10
+                    items: {
+                        P10_USER_ID: #USER_ID#
+                        P10_USERNAME: #USERNAME#
+                        P10_FULL_NAME: #FULL_NAME#
+                        P10_EMAIL: #EMAIL#
+                        P10_DEPARTMENT_ID: #DEPARTMENT_ID#
+                        P10_MANAGER_ID: #MANAGER_ID#
+                        P10_ACTIVE_YN: #ACTIVE_YN#
+                    }
+                    clearCache: 10
+                }
+                linkText: #USERNAME#
             }
             source {
                 dataType: STRING
@@ -538,6 +551,10 @@ page 10 (
                 
                         apex_application.g_print_success_message := 'Employee ' || l_username || ' created successfully with EMPLOYEE role.';
                     else
+                        if nvl(:P10_ACTIVE_YN, 'Y') = 'N' then
+                            hr_auth_pkg.assert_can_deactivate_user(l_user_id);
+                        end if;
+
                         update hr_users
                            set full_name     = trim(:P10_FULL_NAME),
                                email         = lower(trim(:P10_EMAIL)),

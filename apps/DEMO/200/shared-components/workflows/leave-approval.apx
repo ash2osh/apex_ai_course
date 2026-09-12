@@ -90,7 +90,7 @@ workflow leave-approval (
             type: switch
             condition {
                 conditionType: expression
-                plsqlExpression: :REQUESTED_DAYS > 5
+                plsqlExpression: :REQUESTED_DAYS > to_number(hr_workflow_pkg.get_system_setting('LONG_LEAVE_THRESHOLD', '5'))
             }
             layout {
                 sequence: 52
@@ -214,15 +214,15 @@ workflow leave-approval (
                 plsqlCode:
                     ```plsql
                     DECLARE
-                        l_prompt  VARCHAR2(4000);
-                        l_summary VARCHAR2(4000);
+                        l_prompt       VARCHAR2(4000);
+                        l_summary      VARCHAR2(4000);
+                        l_clean_reason VARCHAR2(200);
                     BEGIN
-                        -- Prompt Template:
-                        -- Summarize this leave request in one clear, concise sentence for the manager:
-                        -- Employee: &EMPLOYEE_NAME., Type: &LEAVE_TYPE., Duration: &REQUESTED_DAYS. days, Reason: &REQUEST_REASON.
+                        -- Prompt Template (minimized PII and sanitized inputs):
+                        l_clean_reason := SUBSTR(REGEXP_REPLACE(NVL(:REQUEST_REASON, 'None provided'), '[^A-Za-z0-9 .,''-]', ' '), 1, 150);
                         l_prompt := 'Summarize this leave request in one clear, concise sentence for the manager: ' ||
                                     'Employee: ' || :EMPLOYEE_NAME || ', Type: ' || :LEAVE_TYPE || 
-                                    ', Duration: ' || :REQUESTED_DAYS || ' days, Reason: ' || :REQUEST_REASON;
+                                    ', Duration: ' || :REQUESTED_DAYS || ' days, Context: ' || l_clean_reason;
                     
                         BEGIN
                             l_summary := apex_ai.generate(
