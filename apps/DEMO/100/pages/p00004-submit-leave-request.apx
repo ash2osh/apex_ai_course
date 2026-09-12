@@ -260,7 +260,10 @@ page 4 (
         }
         behavior {
             target: {
-                page: 5
+                page: 6
+                items: {
+                    P6_REQUEST_ID: &P4_REQUEST_ID.
+                }
             }
         }
         serverSideCondition {

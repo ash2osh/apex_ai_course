@@ -310,6 +310,9 @@ page 3 (
             behavior {
                 target: {
                     page: 4
+                    items: {
+                        P4_LEAVE_TYPE_CODE: &LEAVE_TYPE_CODE.
+                    }
                 }
             }
         )

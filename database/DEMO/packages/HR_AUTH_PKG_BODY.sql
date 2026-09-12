@@ -171,10 +171,17 @@
             RETURN FALSE;
         END IF;
 
-        -- Only cancellable if still pending / submitted and start date has not passed
-        IF l_status IN ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL', 'PENDING_HR_APPROVAL')
-           AND l_start_date >= TRUNC(SYSDATE) THEN
-            RETURN TRUE;
+        -- Admins can cancel any pending or workflow error request (operational recovery)
+        IF is_admin(l_actor) THEN
+            IF l_status IN ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL', 'PENDING_HR_APPROVAL', 'WORKFLOW_ERROR') THEN
+                RETURN TRUE;
+            END IF;
+        ELSE
+            -- Employees can cancel only their own pending requests if start date has not passed (same-day allowed)
+            IF l_status IN ('SUBMITTED', 'PENDING', 'PENDING_MANAGER_APPROVAL', 'PENDING_HR_APPROVAL')
+               AND TRUNC(l_start_date) >= TRUNC(SYSDATE) THEN
+                RETURN TRUE;
+            END IF;
         END IF;
 
         RETURN FALSE;

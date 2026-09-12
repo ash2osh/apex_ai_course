@@ -186,12 +186,22 @@ page 7 (
         )
 
         column REQUEST_ID (
-            type: plainText
+            type: link
             heading {
                 heading: Request ID
             }
             layout {
                 sequence: 20
+            }
+            link {
+                target: {
+                    page: 6
+                    items: {
+                        P6_REQUEST_ID: #REQUEST_ID#
+                    }
+                    clearCache: 6
+                }
+                linkText: #REQUEST_ID#
             }
             source {
                 dataType: NUMBER
@@ -237,6 +247,55 @@ page 7 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTOR_USERNAME (
+                sequence: 8
+            )
+
+            displayColumn COMMENTS (
+                sequence: 9
+            )
+
+            displayColumn EVENT_ID (
+                sequence: 1
+            )
+
+            displayColumn EVENT_TIMESTAMP (
+                sequence: 10
+            )
+
+            displayColumn EVENT_TYPE (
+                sequence: 5
+            )
+
+            displayColumn FROM_STATUS (
+                sequence: 6
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 4
+            )
+
+            displayColumn REQUEST_ID (
+                sequence: 2
+            )
+
+            displayColumn REQUEST_TITLE (
+                sequence: 3
+            )
+
+            displayColumn TO_STATUS (
+                sequence: 7
+            )
+
+        )
+
     )
 
 )

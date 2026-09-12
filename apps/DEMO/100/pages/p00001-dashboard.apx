@@ -98,6 +98,9 @@ page 1 (
             behavior {
                 target: {
                     page: 4
+                    items: {
+                        P4_LEAVE_TYPE_CODE: &LEAVE_TYPE_CODE.
+                    }
                 }
             }
         )
@@ -196,6 +199,9 @@ page 1 (
             behavior {
                 target: {
                     page: 6
+                    items: {
+                        P6_REQUEST_ID: &REQUEST_ID.
+                    }
                 }
             }
         )

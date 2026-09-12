@@ -201,6 +201,43 @@ page 6 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTOR_USERNAME (
+                sequence: 5
+            )
+
+            displayColumn COMMENTS (
+                sequence: 6
+            )
+
+            displayColumn EVENT_ID (
+                sequence: 1
+            )
+
+            displayColumn EVENT_TIMESTAMP (
+                sequence: 7
+            )
+
+            displayColumn EVENT_TYPE (
+                sequence: 2
+            )
+
+            displayColumn FROM_STATUS (
+                sequence: 3
+            )
+
+            displayColumn TO_STATUS (
+                sequence: 4
+            )
+
+        )
+
     )
 
     pageItem P6_AI_SUMMARY (
@@ -241,6 +278,9 @@ page 6 (
         appearance {
             template: @/optional-floating
             templateOptions: #DEFAULT#
+        }
+        security {
+            authorizationScheme: @can-cancel-request
         }
         help {
             helpText: Select the reason for cancelling this leave request.
@@ -347,8 +387,12 @@ page 6 (
             slot: next
         }
         appearance {
-            buttonTemplate: @/text
-            templateOptions: #DEFAULT#
+            buttonTemplate: @/text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--danger
+                t-Button--iconLeft
+            ]
             icon: fa-ban
         }
         security {

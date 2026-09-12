@@ -151,12 +151,22 @@ page 5 (
         )
 
         column REQUEST_ID (
-            type: plainText
+            type: link
             heading {
                 heading: Request ID
             }
             layout {
                 sequence: 10
+            }
+            link {
+                target: {
+                    page: 6
+                    items: {
+                        P6_REQUEST_ID: #REQUEST_ID#
+                    }
+                    clearCache: 6
+                }
+                linkText: #REQUEST_ID#
             }
             source {
                 dataType: NUMBER

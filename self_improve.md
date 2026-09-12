@@ -192,3 +192,17 @@ Add lessons below only when the evidence supports them.
 - Preferred behavior: add an `executeCode` process at `execution { point: beforeHeader }` to load the target row into session state items when the primary key item is passed in URL arguments.
 - Verification: detail pages render all fields populated upon page load from report drill-downs.
 
+### Check APEX workflow instance state before calling `apex_workflow.terminate` to prevent internal rollback
+
+- Trigger: calling `apex_workflow.terminate` in a PL/SQL cancellation procedure on an inactive, already terminated, or non-existent workflow instance.
+- Evidence: `apex_workflow.terminate` raised `ORA-20987: APEX - Workflow Instance was not found`. While caught by `WHEN OTHERS THEN NULL;`, Oracle APEX's internal engine executed an internal rollback/savepoint reset before raising, which silently discarded preceding uncommitted table updates (`UPDATE hr_leave_requests` and `UPDATE hr_leave_balances`).
+- Preferred behavior: query `APEX_WORKFLOWS.STATE_CODE` first and only call `apex_workflow.terminate` if the workflow instance is in `ACTIVE` or `SUSPENDED` status. Also execute workflow termination before transactional table DML so any engine failure cannot erase business data updates.
+- Verification: requests with terminated/faulted workflows update status to `CANCELLED` and balance recovery commits cleanly without being rolled back.
+
+### Use declarative column links with `clearCache` instead of raw `htmlExpression` links on interactive reports
+
+- Trigger: configuring drill-down navigation from an Interactive Report column to a target detail page in APEXlang.
+- Evidence: using `columnFormatting { htmlExpression: <a href="f?p=...">...</a> }` manually formats HTML but bypasses APEX's automated checksum generation (`argumentsMustHaveChecksum`), fails to clear stale session state on the target page, and risks broken navigation when URL patterns change. In contrast, declarative column links (`type: link`, `link { target: { page: X, items: { ... }, clearCache: X }, linkText: ... }`) natively handle session tokens, automatic checksum calculation, Universal Theme styling, and cache clearing.
+- Preferred behavior: define drill-down columns in Interactive Reports with `type: link` and specify `target.clearCache` pointing to the target page to prevent stale session state bleed-through.
+- Verification: `uc-apx validate` outputs `valid: true` with 0 errors, and links navigate without checksum or session state caching issues.
+
