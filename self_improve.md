@@ -206,3 +206,10 @@ Add lessons below only when the evidence supports them.
 - Preferred behavior: define drill-down columns in Interactive Reports with `type: link` and specify `target.clearCache` pointing to the target page to prevent stale session state bleed-through.
 - Verification: `uc-apx validate` outputs `valid: true` with 0 errors, and links navigate without checksum or session state caching issues.
 
+### Check `HR_LEAVE_REQUEST_EVENTS.REQUEST_ID` constraint before logging administrative events
+
+- Trigger: calling `hr_leave_pkg.adjust_balance` or logging administrative events where `p_request_id => NULL`.
+- Evidence: execution failed with `ORA-01400: cannot insert NULL into ("DEMO"."HR_LEAVE_REQUEST_EVENTS"."REQUEST_ID")` because `HR_LEAVE_REQUEST_EVENTS.REQUEST_ID` is defined as `NUMBER NOT NULL` with a foreign key to `HR_LEAVE_REQUESTS`.
+- Preferred behavior: when logging balance adjustments or administrative events not tied to a specific leave request, do not pass `NULL` for `p_request_id` unless the schema constraint is altered to be nullable; for tests, configure balances via transactional updates on `HR_LEAVE_BALANCES` and restore baselines upon completion.
+- Verification: automated test suites and balance adjustments run without raising `ORA-01400`.
+
