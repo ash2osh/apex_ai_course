@@ -157,6 +157,19 @@ breadcrumb breadcrumb (
         }
     )
 
+    entry workflow-administration (
+        name: Workflow Administration
+        pageNumber: 200
+        execution {
+            sequence: 130
+        }
+        link {
+            target: {
+                page: 200
+            }
+        }
+    )
+
     entry workflow-monitor (
         name: Workflow Monitor
         pageNumber: 9
@@ -170,16 +183,4 @@ breadcrumb breadcrumb (
         }
     )
 
-    entry workflow-administration (
-        name: Workflow Administration
-        pageNumber: 200
-        execution {
-            sequence: 130
-        }
-        link {
-            target: {
-                page: 200
-            }
-        }
-    )
 )

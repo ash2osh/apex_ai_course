@@ -469,7 +469,7 @@ page 4 (
                         when others then
                             l_task_id := null;
                     end;
-
+                
                     if l_task_id is not null then
                         apex_approval.complete_task(
                             p_task_id  => l_task_id,
@@ -581,7 +581,7 @@ page 4 (
                         when others then
                             l_task_id := null;
                     end;
-
+                
                     if l_task_id is not null then
                         apex_approval.complete_task(
                             p_task_id  => l_task_id,

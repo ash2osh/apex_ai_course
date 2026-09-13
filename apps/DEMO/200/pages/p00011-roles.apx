@@ -131,11 +131,11 @@ page 11 (
             link {
                 target: {
                     page: 11
-                    request: REVOKE_ROLE
                     items: {
                         P11_REVOKE_USER_ROLE_ID: #USER_ROLE_ID#
                     }
                     clearCache: 11
+                    request: REVOKE_ROLE
                 }
                 linkText: Revoke
                 linkAttributes: class="t-Button t-Button--danger t-Button--simple t-Button--tiny"

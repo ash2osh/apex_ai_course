@@ -194,6 +194,35 @@ page 12 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_AT (
+                sequence: 4
+            )
+
+            displayColumn DESCRIPTION (
+                sequence: 3
+            )
+
+            displayColumn SETTING_CODE (
+                sequence: 1
+            )
+
+            displayColumn SETTING_VALUE (
+                sequence: 2
+            )
+
+            displayColumn UPDATED_AT (
+                sequence: 5
+            )
+
+        )
+
     )
 
     pageItem P12_CONFIRM_PASSWORD (

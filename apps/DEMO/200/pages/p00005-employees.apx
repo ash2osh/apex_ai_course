@@ -203,6 +203,47 @@ page 5 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_AT (
+                sequence: 8
+            )
+
+            displayColumn DEPARTMENT_NAME (
+                sequence: 5
+            )
+
+            displayColumn EMAIL (
+                sequence: 4
+            )
+
+            displayColumn FULL_NAME (
+                sequence: 3
+            )
+
+            displayColumn MANAGER_NAME (
+                sequence: 6
+            )
+
+            displayColumn STATUS (
+                sequence: 7
+            )
+
+            displayColumn USERNAME (
+                sequence: 2
+            )
+
+            displayColumn USER_ID (
+                sequence: 1
+            )
+
+        )
+
     )
 
 )

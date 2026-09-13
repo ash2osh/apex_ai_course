@@ -233,6 +233,47 @@ page 7 (
             borderWidth: 0.5
             borderColor: #666666
         }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTIVE_YN (
+                sequence: 6
+            )
+
+            displayColumn CREATED_AT (
+                sequence: 8
+            )
+
+            displayColumn DEFAULT_ENTITLEMENT (
+                sequence: 4
+            )
+
+            displayColumn DISPLAY_ORDER (
+                sequence: 7
+            )
+
+            displayColumn LEAVE_TYPE_CODE (
+                sequence: 2
+            )
+
+            displayColumn LEAVE_TYPE_ID (
+                sequence: 1
+            )
+
+            displayColumn LEAVE_TYPE_NAME (
+                sequence: 3
+            )
+
+            displayColumn REQUIRES_BALANCE_YN (
+                sequence: 5
+            )
+
+        )
+
     )
 
     pageItem P7_ACTIVE_YN (

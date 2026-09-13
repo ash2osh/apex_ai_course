@@ -554,7 +554,7 @@ page 10 (
                         if nvl(:P10_ACTIVE_YN, 'Y') = 'N' then
                             hr_auth_pkg.assert_can_deactivate_user(l_user_id);
                         end if;
-
+                
                         update hr_users
                            set full_name     = trim(:P10_FULL_NAME),
                                email         = lower(trim(:P10_EMAIL)),

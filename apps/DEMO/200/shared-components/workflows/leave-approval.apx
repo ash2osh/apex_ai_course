@@ -95,6 +95,9 @@ workflow leave-approval (
             layout {
                 sequence: 52
             }
+            advanced {
+                diagram: "{\"position\":{\"x\":570,\"y\":1200}}"
+            }
 
             connection (
                 name: <= 5 DAYS
@@ -114,6 +117,9 @@ workflow leave-approval (
                 activity {
                     to: @hr-approval
                 }
+                advanced {
+                    diagram: "{\"source\":{\"args\":{\"dx\":\"50%\",\"dy\":\"50%\",\"rotate\":true},\"name\":\"topLeft\"},\"target\":{\"args\":{\"dx\":\"50%\",\"dy\":\"50%\",\"rotate\":true},\"name\":\"topLeft\"},\"vertices\":[],\"z\":1,\"label\":{\"distance\":0.5,\"offset\":0}}"
+                }
             )
 
         )
@@ -127,6 +133,9 @@ workflow leave-approval (
             }
             layout {
                 sequence: 56
+            }
+            advanced {
+                diagram: "{\"position\":{\"x\":530,\"y\":1630}}"
             }
 
             connection (
@@ -337,6 +346,9 @@ workflow leave-approval (
             layout {
                 sequence: 54
             }
+            advanced {
+                diagram: "{\"position\":{\"x\":310,\"y\":1310}}"
+            }
 
             connection (
                 name: New
@@ -370,7 +382,7 @@ workflow leave-approval (
                 sequence: 70
             }
             advanced {
-                diagram: "{\"position\":{\"x\":970,\"y\":1440},\"z\":12}"
+                diagram: "{\"position\":{\"x\":650,\"y\":1400},\"z\":12}"
             }
         )
 
